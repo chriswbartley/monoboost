@@ -21,5 +21,6 @@ install:
   - python setup.py install
 
 test_script:
-  - cd c:\miniconda35\envs\test-environment\lib\site-packages\monoboost
+  - cd c:\miniconda35\envs\test-environment\lib\site-packages
+  - dir
   - py.test --pyargs monoboost
