@@ -7,9 +7,10 @@ import monoboost as mb
 
 #data_path = op.join(mb.__path__[0], 'data')
 
+
 def test_transform_data():
     npt.assert_equal(1, 1)
-#def test_transform_data():
+# def test_transform_data():
 #    """
 #    Testing the transformation of the data from raw data to functions
 #    used for fitting a function.
@@ -35,7 +36,7 @@ def test_transform_data():
 #    npt.assert_equal(my_n, np.array([2, 2, 2]))
 #
 #
-#def test_cum_gauss():
+# def test_cum_gauss():
 #    sigma = 1
 #    mu = 0
 #    x = np.linspace(-1, 1, 12)
@@ -51,7 +52,7 @@ def test_transform_data():
 #    npt.assert_almost_equal(y[0], (1 - 0.68) / 2, decimal=2)
 #
 #
-#def test_opt_err_func():
+# def test_opt_err_func():
 #    # We define a truly silly function, that returns its input, regardless of
 #    # the params:
 #    def my_silly_func(x, my_first_silly_param, my_other_silly_param):
@@ -79,7 +80,7 @@ def test_transform_data():
 #    npt.assert_equal(my_err, np.zeros(my_x.shape[0]))
 #
 #
-#def test_Model():
+# def test_Model():
 #    """ """
 #    M = sb.Model()
 #    x = np.linspace(0.1, 0.9, 22)
@@ -90,7 +91,7 @@ def test_transform_data():
 #    npt.assert_equal(F.predict(x), target_y)
 #
 #
-#def test_params_regression():
+# def test_params_regression():
 #    """
 #    Test for regressions in model parameter values from provided data
 #    """
