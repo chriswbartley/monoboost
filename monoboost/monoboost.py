@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 28 14:54:18 2017
- 
+
 @author: 19514733
 """
 from __future__ import absolute_import, division, print_function
