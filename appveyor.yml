@@ -21,6 +21,7 @@ install:
   - python setup.py install
 
 test_script:
-  - cd c:\miniconda35\envs\test-environment\lib\site-packages
-  - dir
-  - py.test --pyargs monoboost
+  - mkdir for_test
+  - cd for_test
+  - py.test --pyargs monoboost--cov-report term-missing --cov=monoboost
+
