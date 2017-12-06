@@ -23,5 +23,5 @@ install:
 test_script:
   - mkdir for_test
   - cd for_test
-  - py.test --pyargs monoboost--cov-report term-missing --cov=monoboost
+  - py.test --pyargs monoboost --cov-report term-missing --cov=monoboost
 
