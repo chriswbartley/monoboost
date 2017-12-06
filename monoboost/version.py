@@ -26,13 +26,13 @@ CLASSIFIERS = ["Development Status :: 3 - Alpha",
                "Topic :: Scientific/Engineering"]
 
 # Description should be a one-liner:
-description = "shablona: a template for small scientific Python projects"
+description = "monoboost: a partially monotone instance based classification library"
 # Long description will go up on the pypi page
 long_description = """
 
-Shablona
+Monoboost
 ========
-Shablona is a template project for small scientific Python projects.
+Monoboost is a template project for small scientific Python projects.
 
 It contains software implementations of an analysis of some simple data, but
 more importantly, it contains infrastructure for testing, documentation,
@@ -42,11 +42,11 @@ to use in other projects.
 To get started using these components in your own software, please go to the
 repository README_.
 
-.. _README: https://github.com/uwescience/shablona/blob/master/README.md
+.. _README: https://github.com/chriswbartley/monoboost/blob/master/README.md
 
 License
 =======
-``shablona`` is licensed under the terms of the MIT license. See the file
+``monoboost`` is licensed under the terms of the MIT license. See the file
 "LICENSE" for information on the history of this software, terms & conditions
 for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
@@ -56,20 +56,20 @@ Copyright (c) 2015--, Ariel Rokem, The University of Washington
 eScience Institute.
 """
 
-NAME = "shablona"
-MAINTAINER = "Ariel Rokem"
-MAINTAINER_EMAIL = "arokem@gmail.com"
+NAME = "MonoBoost"
+MAINTAINER = "Christopher Bartley"
+MAINTAINER_EMAIL = "christopher.bartley@research.uwa.edu.au"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
-URL = "http://github.com/uwescience/shablona"
+URL = "http://github.com/chriswbartley/monoboost"
 DOWNLOAD_URL = ""
 LICENSE = "MIT"
-AUTHOR = "Ariel Rokem"
-AUTHOR_EMAIL = "arokem@gmail.com"
+AUTHOR = "Christopher Bartley"
+AUTHOR_EMAIL = "christopher.bartley@research.uwa.edu.au"
 PLATFORMS = "OS Independent"
 MAJOR = _version_major
 MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
-PACKAGE_DATA = {'shablona': [pjoin('data', '*')]}
-REQUIRES = ["numpy"]
+PACKAGE_DATA = {'monoboost': [pjoin('data', '*')]}
+REQUIRES = ["numpy","cvxopt"]

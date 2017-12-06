@@ -5,7 +5,7 @@ API
 Classes
 -------
 
-.. currentmodule:: shablona
+.. currentmodule:: monoboost
 
 .. autosummary::
    :template: class.rst
