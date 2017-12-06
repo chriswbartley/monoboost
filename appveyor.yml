@@ -21,8 +21,4 @@ install:
   - python setup.py install
 
 test_script:
-  - mkdir for_test
-  - cd for_test
-  - cd
-  - dir
   - py.test --pyargs monoboost
