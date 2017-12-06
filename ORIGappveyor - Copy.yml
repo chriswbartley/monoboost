@@ -25,4 +25,4 @@ test_script:
   - cd for_test
   - cd
   - dir
-  - py.test --pyargs monoboost
+  - py.test --pyargs monoboost --cov-report term-missing --cov=monoboost
