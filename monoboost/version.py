@@ -52,8 +52,7 @@ for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (c) 2015--, Ariel Rokem, The University of Washington
-eScience Institute.
+Copyright (c) 2015--, Christopher Bartley, The University of Western Australia.
 """
 
 NAME = "MonoBoost"
