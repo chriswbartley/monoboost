@@ -19,9 +19,11 @@ TOL = 0  # 1e-55
 
 
 class Scale():
-    """Performs scaling of linear variables according to Friedman et al. 2005 Sec 5
+    """Performs scaling of linear variables according to Friedman et al. 2005 
+    Sec 5
 
-    Each variable is firsst Winsorized l->l*, then standardised as 0.4 x l* / std(l*)
+    Each variable is firsst Winsorized l->l*, then standardised as 0.4 x l* / 
+    std(l*).
     Warning: this class should not be used directly.
     """
 
@@ -44,12 +46,15 @@ class Scale():
         scale_multipliers = np.ones(X.shape[1])
         for i_col in np.arange(X.shape[1]):
             num_uniq_vals = len(np.unique(X[:, i_col]))
-            if num_uniq_vals > 2:  # don't scale binary variables which are effectively already rules
+            # don't scale binary variables which are effectively already rules:
+            if num_uniq_vals > 2:  
                 X_col_winsorised = X[:, i_col].copy()
                 X_col_winsorised[X_col_winsorised <
-                                 self.winsor_lims[0, i_col]] = self.winsor_lims[0, i_col]
+                                 self.winsor_lims[0, i_col]
+                                 ] = self.winsor_lims[0, i_col]
                 X_col_winsorised[X_col_winsorised >
-                                 self.winsor_lims[1, i_col]] = self.winsor_lims[1, i_col]
+                                 self.winsor_lims[1, i_col]
+                                 ] = self.winsor_lims[1, i_col]
                 scale_multipliers[i_col] = 1.0 / np.std(X_col_winsorised)
         self.scale_multipliers = scale_multipliers
 
@@ -113,7 +118,8 @@ class MonoComparator():
             return -99
         # if still going, check mt feats by weakened planes
         if len(
-                self.nmt_feats) == 0 or not check_nmt_feats or self.nmt_hyperplane is None:
+                self.nmt_feats) == 0 or not check_nmt_feats or (
+                        self.nmt_hyperplane is None):
             nmt_feat_compliance = True
         else:
             x_diff = np.abs(x2 - x1)
@@ -163,12 +169,11 @@ class MonoLearner():
     def nmt_hyperplane(self):
         """I'm the 'x' property."""
 
-        return self.comparator.nmt_hyperplane  # self._nmt_hyperplane
+        return self.comparator.nmt_hyperplane  
 
     @nmt_hyperplane.setter
     def nmt_hyperplane(self, value):
         self.comparator.nmt_hyperplane = value
-        #self._nmt_hyperplane = value
 
     def predict_proba(self, X_pred):
         if len(X_pred.shape) == 1:
@@ -184,7 +189,6 @@ class MonoLearner():
             is_comp[i] = 1 if comp == 0 or comp == self.dirn else 0
             y_pred[i] = self.coefs[1] if (
                 comp == 0 or comp == self.dirn) else self.coefs[0]
-        #print('comparable: ' + str(num_comp))
         return [y_pred, is_comp]
 
     def fit_from_cache(
@@ -206,42 +210,47 @@ class MonoLearner():
                 comp_idxs = data_dirn['comp_idxs']
                 for i_v in np.arange(len(vs)):
                     comp_pts = comp_idxs[i_v]
-                    # [j for j in np.setdiff1d(np.arange(X.shape[0]) ,comp_pts)])
                     incomp_pts = np.asarray(np.setdiff1d(
                         np.arange(X.shape[0]), comp_pts))
                     hp = hps[i_v, :]
-                    v = vs[i_v]
                     mean_res_in = np.mean(res_train[comp_pts])
                     mean_res_out = np.mean(res_train[incomp_pts])
-                    # np.sqrt(np.sum((res_train[comp_pts]-mean_res_in)**2)+np.sum((res_train[incomp_pts]-mean_res_out)**2))
                     sse = np.sum((res_train[comp_pts] - mean_res_in)**2) + \
                         np.sum((res_train[incomp_pts] - mean_res_out)**2)
                     if hp_reg is not None and len(self.nmt_feats) > 0:
                         if hp_reg == 'L1_nmt' or hp_reg == 'L2_nmt':
                             sse = sse + hp_reg_c * \
-                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1 if hp_reg == 'L1_nmt' else 2)**(1 if hp_reg == 'L1_nmt' else 2)
+                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1 
+                                               if hp_reg == 'L1_nmt' else 
+                                               2)**(1 if hp_reg == 'L1_nmt' 
+                                                else 2)
                         elif hp_reg == 'L1' or hp_reg == 'L2':
                             sse = sse + hp_reg_c * \
-                                np.linalg.norm(hp, ord=1 if hp_reg == 'L1' else 2)**(1 if hp_reg == 'L1' else 2)
+                                np.linalg.norm(hp, ord=1 if hp_reg == 'L1' else
+                                               2)**(1 if hp_reg == 'L1' else 2)
                     if sse <= best[0] and len(
-                            comp_pts) > 0:  # XXX TRY REMOVING len(comp_pts)>0 XXX
+                            comp_pts) > 0:  
                         if self.loss == 'deviance':
                             sum_res_comp = np.sum(
-                                np.abs(res_train[comp_pts]) * (1 - np.abs(res_train[comp_pts])))
+                                np.abs(res_train[comp_pts]) * (1 - 
+                                       np.abs(res_train[comp_pts])))
                             sum_res_incomp = np.sum(
-                                np.abs(res_train[incomp_pts]) * (1 - np.abs(res_train[incomp_pts])))
+                                np.abs(res_train[incomp_pts]) * (1 - 
+                                       np.abs(res_train[incomp_pts])))
                             signed_sum_res_comp = np.sum(res_train[comp_pts])
                             signed_sum_res_incomp = np.sum(
                                 res_train[incomp_pts])
-                            if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9 and np.abs(
-                                    signed_sum_res_comp) > 1e-9 and np.abs(signed_sum_res_incomp) > 1e-9):
+                            if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9 
+                                and np.abs(signed_sum_res_comp) > 1e-9 and (
+                                        np.abs(signed_sum_res_incomp) > 1e-9)):
                                 coef_in = 0.5 * signed_sum_res_comp / \
                                     (sum_res_comp)
-                                if self.learner_type_code == 0:  # std two sided
+                                if self.learner_type_code == 0:  # two sided
                                     coef_out = 0.5 * signed_sum_res_incomp / \
                                         (sum_res_incomp)
                                     ratio = np.max(
-                                        [np.abs(coef_in / coef_out), np.abs(coef_out / coef_in)])
+                                        [np.abs(coef_in / coef_out), 
+                                         np.abs(coef_out / coef_in)])
                                 elif self.learner_type_code == 1:  # one-sided
                                     [coef_out, ratio] = [0., 0.5]
                             else:
@@ -251,19 +260,20 @@ class MonoLearner():
                         elif self.loss == 'rmse':
                             coef_in = np.mean(
                                 y[comp_pts] - curr_totals[comp_pts])
-                            coef_out = 0 if self.learner_type_code == 1 else np.median(
-                                y[incomp_pts] - curr_totals[incomp_pts])
+                            coef_out = (0 if self.learner_type_code == 1 else 
+                                np.median(y[incomp_pts] - 
+                                curr_totals[incomp_pts]))
                             ratio = 0.
                         if np.sign(
-                                coef_in) == dirn and coef_in != np.inf and coef_out != np.inf and ratio < 1e9:
+                                coef_in) == dirn and (coef_in != np.inf and 
+                                coef_out != np.inf and ratio < 1e9):
                             best = [
                                 sse, i, dirn, hp, [
-                                    coef_out, coef_in]]    # err, base, dirn, hp
+                                    coef_out, coef_in]]    
         self.x_base = X[best[1], :]
         self.coefs = best[4]
         self.dirn = best[2]
         self.nmt_hyperplane = best[3]
-        # self.comparator.nmt_hyperplane=self.nmt_hyperplane
         return self
 
     def transform(self, X_pred_):
@@ -277,12 +287,11 @@ class MonoLearner():
         -------
         X_transformed: array-like matrix, shape=(n_samples, 1)
         """
-        #rule_applies = [condition.transform(X) for condition in self.conditions]
-        # return reduce(lambda x,y: x * y, rule_applies)
         res = np.asarray([1 if self.comparator.compare(self.x_base, X_pred_[
-                         i, :]) * self.dirn in [0, 1] else 0 for i in np.arange(X_pred_.shape[0])])
+                        i, :]) * self.dirn in [0, 1] else 0 for i in 
+                        np.arange(X_pred_.shape[0])])
 
-        return res  # .reshape([X_pred_.shape[0],1])
+        return res  
 
 
 class MonoBoost():
@@ -346,7 +355,7 @@ class MonoBoost():
         self.hp_reg_c = hp_reg_c
         self.y_pred_num_comp_ = None
         self.incomp_pred_type = incomp_pred_type
-        self.learner_type = learner_type  # 0 if learner_type=='two-sided' else 1
+        self.learner_type = learner_type  
         self.random_state = np.random.randint(
             1e6) if random_state is None else random_state
         np.random.seed(self.random_state)
@@ -385,7 +394,7 @@ class MonoBoost():
             if weights is None:
                 weights = np.ones(N)
             P = np.zeros([p + N, p + N])
-            for ip in nmt_feats - 1:  # np.arange(p):
+            for ip in nmt_feats - 1:  
                 P[ip, ip] = 1
             q = 1 / (N * v) * np.ones((N + p, 1))
             q[0:p, 0] = 0
@@ -404,7 +413,7 @@ class MonoBoost():
             b = np.asarray([1.])
             P = cvxmat(P)
             q = cvxmat(q)
-            A = cvxmat(A)  # unnecessary
+            A = cvxmat(A)  
             b = cvxmat(b)
             # options['abstol']=1e-20 #(default: 1e-7).
             # options['reltol']=1e-11 #(default: 1e-6)
@@ -437,18 +446,11 @@ class MonoBoost():
             for j in np.arange(X.shape[0]):
                 if y[j] == -dirn:
                     comp = self.mt_comparator.compare(X_base_pt, X[j, :])
-#                    c_=(X[j,:]-X_base_pt)*np.asarray([1 if ii in self.incr_feats else -1 if ii in self.decr_feats else 0 for ii in np.arange(self.n_feats)+1])
-#                    if np.all(c_>=0):
-#                        print('increasing')
-#                    elif np.all(c_<=0):
-#                        print('dereassing')
                     if comp == dirn or comp == 0:
                         comp_indxs_ = comp_indxs_ + [j]
                         d_ = X[j, :] - X_base_pt
                         # if not np.all(d_==0.):
                         deltas[idirn][i_j, :] = np.abs(d_)
-                        # deltas[idirn][i_j,self.decr_feats-1]=dirn*deltas[idirn][i_j,self.decr_feats-1]
-                        # deltas[idirn][i_j,self.nmt_feats-1]=np.abs(deltas[idirn][i_j,self.nmt_feats-1])
                         i_j = i_j + 1
             deltas[idirn] = deltas[idirn][0:i_j, :]
             comp_indxs = comp_indxs + [np.asarray(comp_indxs_)]
@@ -510,13 +512,15 @@ class MonoBoost():
                             weights = weights[0:i_j]
                             i_v_real = 0
                             smt_comparator = MonoComparator(
-                                self.n_feats, self.incr_feats, self.decr_feats, nmt_hyperplane=None)
+                                self.n_feats, self.incr_feats, self.decr_feats,
+                                nmt_hyperplane=None)
                             for i_v in np.arange(len(svm_vs) - 1, -1, -1):
                                 v = svm_vs[i_v]
                                 fitted_hp = self.solve_hp(
                                     self.incr_feats, self.decr_feats, deltas, v, weights)
                                 if fitted_hp[0] != -99 and np.sum(
-                                        np.abs(fitted_hp - hps[i_v_real - 1, :])) > 5e-4:
+                                        np.abs(fitted_hp - hps[i_v_real - 1, :]
+                                        )) > 5e-4:
                                     smt_comparator.nmt_hyperplane = fitted_hp
                                     comp_pts_v = []
                                     if len(comp_idxs) == 0:
@@ -538,8 +542,8 @@ class MonoBoost():
                 # irrelevant)
                 if hps.shape[0] == 0:
                     hps = np.zeros([1, X.shape[1]])
-                    hps[0, :] = np.asarray([1 if kk in self.mt_feats else 0 for kk in np.arange(
-                        X.shape[1]) + 1]) / len(self.mt_feats)
+                    hps[0, :] = np.asarray([1 if kk in self.mt_feats else 0 for 
+                       kk in np.arange(X.shape[1]) + 1]) / len(self.mt_feats)
                     vs = [-99]
                     comp_idxs = [base_comp_idxs]
 
@@ -553,8 +557,8 @@ class MonoBoost():
         Parameters
         ----------
         X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples. Internally, its dtype will be converted to
-            ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csc_matrix``.
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target values (class labels in classification, real numbers in
@@ -636,10 +640,9 @@ class MonoBoost():
                 cont = False
 
             else:
-                # print([est.coefs,est.dirn,est.x_base,est.nmt_hyperplane])
                 [pred_, is_comp] = est.predict_proba(self.X_scaled)
                 curr_ttls = curr_ttls + self.eta * pred_
-                if self.standardise:  # unstandardise the estimator so it can be used and interpreted raw
+                if self.standardise:  # unstandardise the estimator
                     est.x_base = self.scale.unscale(est.x_base)
                     est.nmt_hyperplane = self.scale.scale(est.nmt_hyperplane)
                 self.estimators = self.estimators + [est]
@@ -657,14 +660,11 @@ class MonoBoost():
                         self.y_pred_train_all[:, i_iter] != y) / len(y)
                     if self.verbose:
                         print(
-                            np.sum(self.y_pred_train_all[:, i_iter] != y) / len(y))
+                            np.sum(self.y_pred_train_all[:, i_iter] != y
+                            ) / len(y))
                 elif self.loss_ == 'rmse':
                     res_train = robust_sign(y_std - curr_ttls)
                 cont = i_iter < (self.num_estimators - 1)
-
-#                y_pred_test=predict_ensemble(snmi,X_test,ensemble,eta)
-#                train_err=train_err+[np.sum(y_pred_train!=y_train)/len(y_train)]
-#                test_err=test_err+[np.sum(y_pred_test!=y_test)/len(y_test)]
                 i_iter = i_iter + 1
         if self.loss_ == 'deviance':
             self.y_pred = np.sign(curr_ttls)
@@ -684,9 +684,8 @@ class MonoBoost():
             The input samples. Internally, it will be converted to
             ``dtype=np.float32`` and if a sparse matrix is provided
             to a sparse ``csr_matrix``.
-        loo : boolean, (default=False)
-            True to exclude one matchng datapoint from training set when doing prediction.
-            Effectively Leave-One-Out cross validation.
+        cum : boolean, (default=False)
+            True to include predictions for all stages cumulatively.
         Returns
         -------
         y : array of shape = [n_samples] or [n_samples, n_outputs]
@@ -731,50 +730,7 @@ class MonoBoost():
         return np.array([instance.transform(X)
                          for instance in self.estimators]).T
 
-#        self.tmp_num_comparable_estimators=num_comp.copy()
-#        self.incomp_pred_type='none'#'local_partial_order' none
-#        num_pred_special=0
-#        if self.incomp_pred_type=='local_partial_order':
-#            [ypred_orig,num_comp_orig]=self.predict_proba(self.X)
-#            indx_train_comp=np.arange(self.X.shape[0])[self.y_pred_num_comp>0]
-#            y_pred_comp=self.y_pred[indx_train_comp]
-#            X_comp=self.X[indx_train_comp,:]
-#            kNN=KNeighborsClassifier(n_neighbors=5)
-#            kNN.fit(X_comp,y_pred_comp)
-#            y_pred_kNN= kNN.predict(X_pred)
-#            for j in np.arange(len(y)):
-#                if num_comp[j]==0:
-#                    # fit local hp in each direction, and find points within each cone
-#                    [comp_indxs,deltas]=self.get_deltas(X_pred[j,:], self.X,self.y)
-#                    defining_classes=[0,0]
-#                    for idirn in [0,1]:
-#                        if len(comp_indxs[idirn])>0:
-#                            hp=self.solve_hp(self.incr_feats,self.decr_feats,deltas[idirn],self.vs[0])
-#                            if hp[0]==-99:
-#                                defining_classes[idirn]=99
-#                            else:
-#                                y_def=-1 if idirn==0 else 1 # provides no information
-#                                for k in comp_indxs[idirn]:
-#                                    if num_comp_orig[k]>0:#self.pred_y_num_comp[k]>0:
-#                                        x_diff=np.abs(self.X[k,:]-X_pred[j,:])
-#                                        dot_prod=np.dot(hp,x_diff)
-#                                        nmt_feat_compliance=dot_prod>=-TOL
-#                                        if nmt_feat_compliance >=0:
-#                                            if self.y[k]!=y_def:
-#                                                defining_classes[idirn]=self.y_pred[k]
-#                                                break # no need to go any further
-#
-#                    # resolve lower and upper regions
-#                    if defining_classes[0]==+1:
-#                        y[j]=1
-#                        num_pred_special=num_pred_special+1
-#                    elif defining_classes[1]==-1:
-#                        y[j]=-1
-#                        num_pred_special=num_pred_special+1
-#                    else:
-#                        y[j]=y_pred_kNN[j]#self.y_maj_class
-#            print('prop special: ' + str(num_pred_special) + '/' + str(np.sum(num_comp==0)))
-#        return y
+
 
 
 class MonoBoostEnsemble():
@@ -835,7 +791,7 @@ class MonoBoostEnsemble():
         self.verbose = verbose
         self.y_pred_num_comp_ = None
         self.learner_incomp_pred_type = learner_incomp_pred_type
-        self.learner_type = learner_type  # 0 if learner_type=='two-sided' else 1
+        self.learner_type = learner_type  
         self.learner_num_estimators = learner_num_estimators
         self.learner_eta = learner_eta
         self.learner_v_mode = learner_v_mode
@@ -851,8 +807,8 @@ class MonoBoostEnsemble():
         Parameters
         ----------
         X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples. Internally, its dtype will be converted to
-            ``dtype=np.float32``. If a sparse matrix is provided, it will be
+            The training input samples. Internally, its dtype will be converted
+            to ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csc_matrix``.
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target values (class labels in classification, real numbers in
@@ -934,11 +890,15 @@ class MonoBoostEnsemble():
             # Extract estimators - recalculate coefficients based on deviance
             # loss
             for est_monolearn in est.estimators:
-                comp_pts_indx = np.arange(X_sub.shape[0])[np.asarray([True if est_monolearn.comparator.compare(
-                    est_monolearn.x_base, X_sub[i_, :]) * est_monolearn.dirn in [0, 1] else False for i_ in np.arange(X_sub.shape[0])])]
+                comp_pts_indx = np.arange(X_sub.shape[0])[np.asarray([
+                        True if est_monolearn.comparator.compare(
+                        est_monolearn.x_base, X_sub[i_, :]
+                        ) * est_monolearn.dirn in [0, 1] else False 
+                        for i_ in np.arange(X_sub.shape[0])])]
                 if self.loss_ == 'deviance':
-                    coef_in = 0.5 * np.sum(res_train_sub[comp_pts_indx]) / np.sum(np.abs(
-                        res_train_sub[comp_pts_indx]) * (1 - np.abs(res_train_sub[comp_pts_indx])))
+                    coef_in = 0.5 * np.sum(res_train_sub[comp_pts_indx]
+                        ) / np.sum(np.abs(res_train_sub[comp_pts_indx]) * 
+                        (1 - np.abs(res_train_sub[comp_pts_indx])))
                 elif self.loss_ == 'rmse':
                     coef_in = np.median(
                         y_std[comp_pts_indx] - curr_ttls[comp_pts_indx])
@@ -947,14 +907,12 @@ class MonoBoostEnsemble():
                 # Update function totals (for ALL, not just subsample)
                 [pred_, is_comp] = est_monolearn.predict_proba(X_scaled)
                 curr_ttls = curr_ttls + self.eta * pred_
-                if self.standardise:  # unscale this estimator so it can be used raw
+                if self.standardise:  # unscale this estimator 
                     est_monolearn.x_base = self.scale.unscale(
                         est_monolearn.x_base)
                     est_monolearn.nmt_hyperplane = self.scale.scale(
                         est_monolearn.nmt_hyperplane)
                 self.estimators = self.estimators + [est_monolearn]
-                #[pred_,is_comp]=est_monolearn.predict_proba(X_sub[comp_pts_indx])
-                # curr_ttls[sample_indx[comp_pts_indx]]=curr_ttls[sample_indx][comp_pts_indx]+self.eta*pred_
             # Update res_train for next iteration
             if self.loss_ == 'deviance':
                 # prevents overflow at the next step
@@ -985,9 +943,8 @@ class MonoBoostEnsemble():
             The input samples. Internally, it will be converted to
             ``dtype=np.float32`` and if a sparse matrix is provided
             to a sparse ``csr_matrix``.
-        loo : boolean, (default=False)
-            True to exclude one matchng datapoint from training set when doing prediction.
-            Effectively Leave-One-Out cross validation.
+        cum : boolean, (default=False)
+            True to include all predictions for all stages. 
         Returns
         -------
         y : array of shape = [n_samples] or [n_samples, n_outputs]
@@ -1051,247 +1008,4 @@ def robust_sign(y):
     return y_
 
 
-def _convert(H, f, A, b, Aeq, beq, lb, ub):
-    """
-    Convert everything to
-    cvxopt-style matrices
-    """
-    P = cvxmat(H)
-    q = cvxmat(f)
-    if Aeq is None:
-        A_ = None
-    else:
-        A_ = cvxmat(Aeq)
-    if beq is None:
-        b_ = None
-    else:
-        b_ = cvxmat(beq)
 
-    if lb is None and ub is None:
-        if A is None:
-            G = None
-            h = None
-        else:
-            G = cvxmat(A)
-            h = cvxmat(b)
-    else:
-        n = len(lb)
-        if A is None:
-            G = sparse([-speye(n), speye(n)])
-            h = cvxmat(np.vstack([-lb, ub]))
-        else:
-            G = sparse([cvxmat(A), -speye(n), speye(n)])
-            h = cvxmat(np.vstack([b, -lb, ub]))
-
-    return P, q, G, h, A_, b_
-#from __future__ import absolute_import, division, print_function
-#import numpy as np
-#import pandas as pd
-#import scipy.optimize as opt
-#from scipy.special import erf
-#from .due import due, Doi
-#
-#__all__ = ["Model", "Fit", "opt_err_func", "transform_data", "cumgauss"]
-#
-#
-# Use duecredit (duecredit.org) to provide a citation to relevant work to
-# be cited. This does nothing, unless the user has duecredit installed,
-# And calls this with duecredit (as in `python -m duecredit script.py`):
-# due.cite(Doi("10.1167/13.9.30"),
-#         description="Template project for small scientific Python projects",
-#         tags=["reference-implementation"],
-#         path='monoboost')
-#
-#
-# def transform_data(data):
-#    """
-#    Function that takes experimental data and gives us the
-#    dependent/independent variables for analysis.
-#
-#    Parameters
-#    ----------
-#    data : Pandas DataFrame or string.
-#        If this is a DataFrame, it should have the columns `contrast1` and
-#        `answer` from which the dependent and independent variables will be
-#        extracted. If this is a string, it should be the full path to a csv
-#        file that contains data that can be read into a DataFrame with this
-#        specification.
-#
-#    Returns
-#    -------
-#    x : array
-#        The unique contrast differences.
-#    y : array
-#        The proportion of '2' answers in each contrast difference
-#    n : array
-#        The number of trials in each x,y condition
-#    """
-#    if isinstance(data, str):
-#        data = pd.read_csv(data)
-#
-#    contrast1 = data['contrast1']
-#    answers = data['answer']
-#
-#    x = np.unique(contrast1)
-#    y = []
-#    n = []
-#
-#    for c in x:
-#        idx = np.where(contrast1 == c)
-#        n.append(float(len(idx[0])))
-#        answer1 = len(np.where(answers[idx[0]] == 1)[0])
-#        y.append(answer1 / n[-1])
-#    return x, y, n
-#
-#
-# def cumgauss(x, mu, sigma):
-#    """
-#    The cumulative Gaussian at x, for the distribution with mean mu and
-#    standard deviation sigma.
-#
-#    Parameters
-#    ----------
-#    x : float or array
-#       The values of x over which to evaluate the cumulative Gaussian function
-#
-#    mu : float
-#       The mean parameter. Determines the x value at which the y value is 0.5
-#
-#    sigma : float
-#       The variance parameter. Determines the slope of the curve at the point
-#       of Deflection
-#
-#    Returns
-#    -------
-#
-#    g : float or array
-#        The cumulative gaussian with mean $\\mu$ and variance $\\sigma$
-#        evaluated at all points in `x`.
-#
-#    Notes
-#    -----
-#    Based on:
-#    http://en.wikipedia.org/wiki/Normal_distribution#Cumulative_distribution_function
-#
-#    The cumulative Gaussian function is defined as:
-#
-#    .. math::
-#
-#        \\Phi(x) = \\frac{1}{2} [1 + erf(\\frac{x}{\\sqrt{2}})]
-#
-#    Where, $erf$, the error function is defined as:
-#
-#    .. math::
-#
-#        erf(x) = \\frac{1}{\\sqrt{\\pi}} \int_{-x}^{x} e^{t^2} dt
-#
-#    """
-#    return 0.5 * (1 + erf((x - mu) / (np.sqrt(2) * sigma)))
-#
-#
-# def opt_err_func(params, x, y, func):
-#    """
-#    Error function for fitting a function using non-linear optimization.
-#
-#    Parameters
-#    ----------
-#    params : tuple
-#        A tuple with the parameters of `func` according to their order of
-#        input
-#
-#    x : float array
-#        An independent variable.
-#
-#    y : float array
-#        The dependent variable.
-#
-#    func : function
-#        A function with inputs: `(x, *params)`
-#
-#    Returns
-#    -------
-#    float array
-#        The marginals of the fit to x/y given the params
-#    """
-#    return y - func(x, *params)
-#
-#
-# class Model(object):
-#    """Class for fitting cumulative Gaussian functions to data"""
-#    def __init__(self, func=cumgauss):
-#        """ Initialize a model object.
-#
-#        Parameters
-#        ----------
-#        data : Pandas DataFrame
-#            Data from a subjective contrast judgement experiment
-#
-#        func : callable, optional
-#            A function that relates x and y through a set of parameters.
-#            Default: :func:`cumgauss`
-#        """
-#        self.func = func
-#
-#    def fit(self, x, y, initial=[0.5, 1]):
-#        """
-#        Fit a Model to data.
-#
-#        Parameters
-#        ----------
-#        x : float or array
-#           The independent variable: contrast values presented in the
-#           experiment
-#        y : float or array
-#           The dependent variable
-#
-#        Returns
-#        -------
-#        fit : :class:`Fit` instance
-#            A :class:`Fit` object that contains the parameters of the model.
-#
-#        """
-#        params, _ = opt.leastsq(opt_err_func, initial,
-#                                args=(x, y, self.func))
-#        return Fit(self, params)
-#
-#
-# class Fit(object):
-#    """
-#    Class for representing a fit of a model to data
-#    """
-#    def __init__(self, model, params):
-#        """
-#        Initialize a :class:`Fit` object.
-#
-#        Parameters
-#        ----------
-#        model : a :class:`Model` instance
-#            An object representing the model used
-#
-#        params : array or list
-#            The parameters of the model evaluated for the data
-#
-#        """
-#        self.model = model
-#        self.params = params
-#
-#    def predict(self, x):
-#        """
-#        Predict values of the dependent variable based on values of the
-#        indpendent variable.
-#
-#        Parameters
-#        ----------
-#        x : float or array
-#            Values of the independent variable. Can be values presented in
-#            the experiment. For out-of-sample prediction (e.g. in
-#            cross-validation), these can be values
-#            that were not presented in the experiment.
-#
-#        Returns
-#        -------
-#        y : float or array
-#            Predicted values of the dependent variable, corresponding to
-#            values of the independent variable.
-#        """
-#        return self.model.func(x, *self.params)
