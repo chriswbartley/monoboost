@@ -96,7 +96,7 @@ class MonoComparator():
         # check mt feats all increasing (or decreasing)
         mt_feats_difference = np.zeros(self.n_feats)
         if len(self.mt_feats) > 0:
-            feats_indx=self.mt_feats - 1
+            feats_indx = self.mt_feats - 1
             mt_feats_difference[feats_indx] = x2[feats_indx] - x1[feats_indx]
         mt_feats_same = np.sum(mt_feats_difference[self.mt_feats - 1] == 0)
         if strict:
@@ -226,17 +226,18 @@ class MonoLearner():
                     if sse <= best[0] and len(
                             comp_pts) > 0:
                         if self.loss == 'deviance':
-                            res_comp_pts=res_train[comp_pts]
-                            res_incomp_pts=res_train[incomp_pts]
+                            res_comp_pts = res_train[comp_pts]
+                            res_incomp_pts = res_train[incomp_pts]
                             sum_res_comp = np.sum(np.abs(res_comp_pts) * (
-                                    1 - np.abs(res_comp_pts)))
+                                1 - np.abs(res_comp_pts)))
                             sum_res_incomp = np.sum(np.abs(res_incomp_pts) * (
-                                    1 - np.abs(res_incomp_pts)))
+                                1 - np.abs(res_incomp_pts)))
                             signed_sum_res_comp = np.sum(res_comp_pts)
                             signed_sum_res_incomp = np.sum(res_incomp_pts)
-                            if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9
-                                    and np.abs(signed_sum_res_comp) > 1e-9
-                                    and np.abs(signed_sum_res_incomp) > 1e-9):
+                            if (sum_res_comp > 1e-9 and
+                                    sum_res_incomp > 1e-9 and
+                                    np.abs(signed_sum_res_comp) > 1e-9 and
+                                    np.abs(signed_sum_res_incomp) > 1e-9):
                                 coef_in = 0.5 * signed_sum_res_comp / \
                                     (sum_res_comp)
                                 if self.learner_type_code == 0:  # two sided
@@ -538,8 +539,8 @@ class MonoBoost():
                 if hps.shape[0] == 0:
                     hps = np.zeros([1, X.shape[1]])
                     hps[0, :] = np.asarray(
-                            [1 if kk in self.mt_feats else 0 for kk in 
-                             np.arange(X.shape[1]) + 1]) / len(self.mt_feats)
+                        [1 if kk in self.mt_feats else 0 for kk in
+                         np.arange(X.shape[1]) + 1]) / len(self.mt_feats)
                     vs = [-99]
                     comp_idxs = [base_comp_idxs]
 
@@ -890,9 +891,9 @@ class MonoBoostEnsemble():
                     ) * est_monolearn.dirn in [0, 1] else False
                     for i_ in np.arange(X_sub.shape[0])])]
                 if self.loss_ == 'deviance':
-                    res_comp_pts=res_train_sub[comp_pts_indx]
+                    res_comp_pts = res_train_sub[comp_pts_indx]
                     coef_in = 0.5 * np.sum(res_comp_pts) / np.sum(
-                            np.abs(res_comp_pts) * (1 - np.abs(res_comp_pts)))
+                        np.abs(res_comp_pts) * (1 - np.abs(res_comp_pts)))
                 elif self.loss_ == 'rmse':
                     coef_in = np.median(
                         y_std[comp_pts_indx] - curr_ttls[comp_pts_indx])
