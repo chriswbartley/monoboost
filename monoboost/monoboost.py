@@ -96,8 +96,8 @@ class MonoComparator():
         # check mt feats all increasing (or decreasing)
         mt_feats_difference = np.zeros(self.n_feats)
         if len(self.mt_feats) > 0:
-            mt_feats_difference[self.mt_feats - 1] = x2[self.mt_feats - 1
-                               ] - x1[self.mt_feats - 1]
+            feats_indx=self.mt_feats - 1
+            mt_feats_difference[feats_indx] = x2[feats_indx] - x1[feats_indx]
         mt_feats_same = np.sum(mt_feats_difference[self.mt_feats - 1] == 0)
         if strict:
             mt_feats_incr = np.sum(mt_feats_difference[self.mt_feats - 1] > 0)
@@ -126,11 +126,6 @@ class MonoComparator():
             dot_prod = np.dot(self.nmt_hyperplane, x_diff)
             nmt_feat_compliance = dot_prod >= -TOL
         # return result
-#        try:
-#            if len(nmt_feat_compliance)>0:
-#                print('sdf')
-#        except:
-#            pass
         if nmt_feat_compliance:
             return comp
         else:  # incomparable due to nmt features
@@ -231,18 +226,17 @@ class MonoLearner():
                     if sse <= best[0] and len(
                             comp_pts) > 0:
                         if self.loss == 'deviance':
-                            sum_res_comp = np.sum(
-                                np.abs(res_train[comp_pts]
-                                ) * (1 -np.abs(res_train[comp_pts])))
-                            sum_res_incomp = np.sum(
-                                np.abs(res_train[incomp_pts]
-                                ) * (1 -np.abs(res_train[incomp_pts])))
-                            signed_sum_res_comp = np.sum(res_train[comp_pts])
-                            signed_sum_res_incomp = np.sum(
-                                res_train[incomp_pts])
+                            res_comp_pts=res_train[comp_pts]
+                            res_incomp_pts=res_train[incomp_pts]
+                            sum_res_comp = np.sum(np.abs(res_comp_pts) * (
+                                    1 - np.abs(res_comp_pts)))
+                            sum_res_incomp = np.sum(np.abs(res_incomp_pts) * (
+                                    1 - np.abs(res_incomp_pts)))
+                            signed_sum_res_comp = np.sum(res_comp_pts)
+                            signed_sum_res_incomp = np.sum(res_incomp_pts)
                             if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9
-                                and np.abs(signed_sum_res_comp) > 1e-9 
-                                and np.abs(signed_sum_res_incomp) > 1e-9):
+                                    and np.abs(signed_sum_res_comp) > 1e-9
+                                    and np.abs(signed_sum_res_incomp) > 1e-9):
                                 coef_in = 0.5 * signed_sum_res_comp / \
                                     (sum_res_comp)
                                 if self.learner_type_code == 0:  # two sided
@@ -265,7 +259,7 @@ class MonoLearner():
                                                   curr_totals[incomp_pts]))
                             ratio = 0.
                         if np.sign(coef_in) == dirn and (
-                                coef_in != np.inf and coef_out != np.inf and 
+                                coef_in != np.inf and coef_out != np.inf and
                                 ratio < 1e9):
                             best = [
                                 sse, i, dirn, hp, [
@@ -369,7 +363,7 @@ class MonoBoost():
     @property
     def y_pred_num_comp(self):
         """I'm the 'x' property."""
-        if not hasattr(self, 'y_pred_num_comp_') :
+        if not hasattr(self, 'y_pred_num_comp_'):
             self.y_pred_num_comp_ = None
         if self.y_pred_num_comp_ is None:
             [ypred, num_comp] = self.predict_proba(self.X)
@@ -431,7 +425,7 @@ class MonoBoost():
             else:
                 soln = sol['x']
                 w = np.ravel(soln[0:p, :])
-                #err = np.asarray(soln[-N:, :])
+                # err = np.asarray(soln[-N:, :])
                 return w
 
     def get_deltas(self, X_base_pt, X, y):
@@ -517,7 +511,7 @@ class MonoBoost():
                             for i_v in np.arange(len(svm_vs) - 1, -1, -1):
                                 v = svm_vs[i_v]
                                 fitted_hp = self.solve_hp(
-                                    self.incr_feats, self.decr_feats, deltas, 
+                                    self.incr_feats, self.decr_feats, deltas,
                                     v, weights)
                                 if fitted_hp[0] != -99 and np.sum(
                                         np.abs(fitted_hp - hps[i_v_real - 1, :]
@@ -543,9 +537,9 @@ class MonoBoost():
                 # irrelevant)
                 if hps.shape[0] == 0:
                     hps = np.zeros([1, X.shape[1]])
-                    hps[0, :] = np.asarray([1 if kk in self.mt_feats else 0 
-                       for kk in np.arange(X.shape[1]) + 1]) / len(
-                        self.mt_feats)
+                    hps[0, :] = np.asarray(
+                            [1 if kk in self.mt_feats else 0 for kk in 
+                             np.arange(X.shape[1]) + 1]) / len(self.mt_feats)
                     vs = [-99]
                     comp_idxs = [base_comp_idxs]
 
@@ -896,11 +890,9 @@ class MonoBoostEnsemble():
                     ) * est_monolearn.dirn in [0, 1] else False
                     for i_ in np.arange(X_sub.shape[0])])]
                 if self.loss_ == 'deviance':
-                    coef_in = 0.5 * np.sum(res_train_sub[comp_pts_indx]
-                                           ) / np.sum(np.abs(res_train_sub
-                                           [comp_pts_indx]) * (
-                                            1 - np.abs(res_train_sub[
-                                                    comp_pts_indx])))
+                    res_comp_pts=res_train_sub[comp_pts_indx]
+                    coef_in = 0.5 * np.sum(res_comp_pts) / np.sum(
+                            np.abs(res_comp_pts) * (1 - np.abs(res_comp_pts)))
                 elif self.loss_ == 'rmse':
                     coef_in = np.median(
                         y_std[comp_pts_indx] - curr_ttls[comp_pts_indx])
