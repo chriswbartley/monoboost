@@ -298,6 +298,7 @@ class MonoBoost():
     eg_attr: list of DecisionTreeClassifier
         The collection of fitted sub-estimators.
 
+
     References
     ----------
 
