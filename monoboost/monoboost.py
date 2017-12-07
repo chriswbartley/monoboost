@@ -19,10 +19,10 @@ TOL = 0  # 1e-55
 
 
 class Scale():
-    """Performs scaling of linear variables according to Friedman et al. 2005 
+    """Performs scaling of linear variables according to Friedman et al. 2005
     Sec 5
 
-    Each variable is firsst Winsorized l->l*, then standardised as 0.4 x l* / 
+    Each variable is firsst Winsorized l->l*, then standardised as 0.4 x l* /
     std(l*).
     Warning: this class should not be used directly.
     """
@@ -47,7 +47,7 @@ class Scale():
         for i_col in np.arange(X.shape[1]):
             num_uniq_vals = len(np.unique(X[:, i_col]))
             # don't scale binary variables which are effectively already rules:
-            if num_uniq_vals > 2:  
+            if num_uniq_vals > 2:
                 X_col_winsorised = X[:, i_col].copy()
                 X_col_winsorised[X_col_winsorised <
                                  self.winsor_lims[0, i_col]
@@ -118,8 +118,8 @@ class MonoComparator():
             return -99
         # if still going, check mt feats by weakened planes
         if len(
-                self.nmt_feats) == 0 or not check_nmt_feats or (
-                        self.nmt_hyperplane is None):
+            self.nmt_feats) == 0 or not check_nmt_feats or (
+                self.nmt_hyperplane is None):
             nmt_feat_compliance = True
         else:
             x_diff = np.abs(x2 - x1)
@@ -169,7 +169,7 @@ class MonoLearner():
     def nmt_hyperplane(self):
         """I'm the 'x' property."""
 
-        return self.comparator.nmt_hyperplane  
+        return self.comparator.nmt_hyperplane
 
     @nmt_hyperplane.setter
     def nmt_hyperplane(self, value):
@@ -220,36 +220,36 @@ class MonoLearner():
                     if hp_reg is not None and len(self.nmt_feats) > 0:
                         if hp_reg == 'L1_nmt' or hp_reg == 'L2_nmt':
                             sse = sse + hp_reg_c * \
-                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1 
-                                               if hp_reg == 'L1_nmt' else 
-                                               2)**(1 if hp_reg == 'L1_nmt' 
-                                                else 2)
+                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1
+                                               if hp_reg == 'L1_nmt' else
+                                               2)**(1 if hp_reg == 'L1_nmt'
+                                                    else 2)
                         elif hp_reg == 'L1' or hp_reg == 'L2':
                             sse = sse + hp_reg_c * \
                                 np.linalg.norm(hp, ord=1 if hp_reg == 'L1' else
                                                2)**(1 if hp_reg == 'L1' else 2)
                     if sse <= best[0] and len(
-                            comp_pts) > 0:  
+                            comp_pts) > 0:
                         if self.loss == 'deviance':
                             sum_res_comp = np.sum(
-                                np.abs(res_train[comp_pts]) * (1 - 
-                                       np.abs(res_train[comp_pts])))
+                                np.abs(res_train[comp_pts]) * (1 -
+                                                               np.abs(res_train[comp_pts])))
                             sum_res_incomp = np.sum(
-                                np.abs(res_train[incomp_pts]) * (1 - 
-                                       np.abs(res_train[incomp_pts])))
+                                np.abs(res_train[incomp_pts]) * (1 -
+                                                                 np.abs(res_train[incomp_pts])))
                             signed_sum_res_comp = np.sum(res_train[comp_pts])
                             signed_sum_res_incomp = np.sum(
                                 res_train[incomp_pts])
-                            if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9 
+                            if (sum_res_comp > 1e-9 and sum_res_incomp > 1e-9
                                 and np.abs(signed_sum_res_comp) > 1e-9 and (
-                                        np.abs(signed_sum_res_incomp) > 1e-9)):
+                                    np.abs(signed_sum_res_incomp) > 1e-9)):
                                 coef_in = 0.5 * signed_sum_res_comp / \
                                     (sum_res_comp)
                                 if self.learner_type_code == 0:  # two sided
                                     coef_out = 0.5 * signed_sum_res_incomp / \
                                         (sum_res_incomp)
                                     ratio = np.max(
-                                        [np.abs(coef_in / coef_out), 
+                                        [np.abs(coef_in / coef_out),
                                          np.abs(coef_out / coef_in)])
                                 elif self.learner_type_code == 1:  # one-sided
                                     [coef_out, ratio] = [0., 0.5]
@@ -260,16 +260,15 @@ class MonoLearner():
                         elif self.loss == 'rmse':
                             coef_in = np.mean(
                                 y[comp_pts] - curr_totals[comp_pts])
-                            coef_out = (0 if self.learner_type_code == 1 else 
-                                np.median(y[incomp_pts] - 
-                                curr_totals[incomp_pts]))
+                            coef_out = (0 if self.learner_type_code == 1 else
+                                        np.median(y[incomp_pts] -
+                                                  curr_totals[incomp_pts]))
                             ratio = 0.
-                        if np.sign(
-                                coef_in) == dirn and (coef_in != np.inf and 
-                                coef_out != np.inf and ratio < 1e9):
+                        if np.sign(coef_in) == dirn and (
+                                coef_in != np.inf and coef_out != np.inf and ratio < 1e9):
                             best = [
                                 sse, i, dirn, hp, [
-                                    coef_out, coef_in]]    
+                                    coef_out, coef_in]]
         self.x_base = X[best[1], :]
         self.coefs = best[4]
         self.dirn = best[2]
@@ -288,10 +287,10 @@ class MonoLearner():
         X_transformed: array-like matrix, shape=(n_samples, 1)
         """
         res = np.asarray([1 if self.comparator.compare(self.x_base, X_pred_[
-                        i, :]) * self.dirn in [0, 1] else 0 for i in 
-                        np.arange(X_pred_.shape[0])])
+            i, :]) * self.dirn in [0, 1] else 0 for i in
+            np.arange(X_pred_.shape[0])])
 
-        return res  
+        return res
 
 
 class MonoBoost():
@@ -355,7 +354,7 @@ class MonoBoost():
         self.hp_reg_c = hp_reg_c
         self.y_pred_num_comp_ = None
         self.incomp_pred_type = incomp_pred_type
-        self.learner_type = learner_type  
+        self.learner_type = learner_type
         self.random_state = np.random.randint(
             1e6) if random_state is None else random_state
         np.random.seed(self.random_state)
@@ -394,7 +393,7 @@ class MonoBoost():
             if weights is None:
                 weights = np.ones(N)
             P = np.zeros([p + N, p + N])
-            for ip in nmt_feats - 1:  
+            for ip in nmt_feats - 1:
                 P[ip, ip] = 1
             q = 1 / (N * v) * np.ones((N + p, 1))
             q[0:p, 0] = 0
@@ -413,7 +412,7 @@ class MonoBoost():
             b = np.asarray([1.])
             P = cvxmat(P)
             q = cvxmat(q)
-            A = cvxmat(A)  
+            A = cvxmat(A)
             b = cvxmat(b)
             # options['abstol']=1e-20 #(default: 1e-7).
             # options['reltol']=1e-11 #(default: 1e-6)
@@ -520,7 +519,7 @@ class MonoBoost():
                                     self.incr_feats, self.decr_feats, deltas, v, weights)
                                 if fitted_hp[0] != -99 and np.sum(
                                         np.abs(fitted_hp - hps[i_v_real - 1, :]
-                                        )) > 5e-4:
+                                               )) > 5e-4:
                                     smt_comparator.nmt_hyperplane = fitted_hp
                                     comp_pts_v = []
                                     if len(comp_idxs) == 0:
@@ -542,8 +541,8 @@ class MonoBoost():
                 # irrelevant)
                 if hps.shape[0] == 0:
                     hps = np.zeros([1, X.shape[1]])
-                    hps[0, :] = np.asarray([1 if kk in self.mt_feats else 0 for 
-                       kk in np.arange(X.shape[1]) + 1]) / len(self.mt_feats)
+                    hps[0, :] = np.asarray([1 if kk in self.mt_feats else 0 for kk in np.arange(
+                        X.shape[1]) + 1]) / len(self.mt_feats)
                     vs = [-99]
                     comp_idxs = [base_comp_idxs]
 
@@ -661,7 +660,7 @@ class MonoBoost():
                     if self.verbose:
                         print(
                             np.sum(self.y_pred_train_all[:, i_iter] != y
-                            ) / len(y))
+                                   ) / len(y))
                 elif self.loss_ == 'rmse':
                     res_train = robust_sign(y_std - curr_ttls)
                 cont = i_iter < (self.num_estimators - 1)
@@ -731,8 +730,6 @@ class MonoBoost():
                          for instance in self.estimators]).T
 
 
-
-
 class MonoBoostEnsemble():
     """ Partially Monotone Boosting classifier ensemble
     var
@@ -791,7 +788,7 @@ class MonoBoostEnsemble():
         self.verbose = verbose
         self.y_pred_num_comp_ = None
         self.learner_incomp_pred_type = learner_incomp_pred_type
-        self.learner_type = learner_type  
+        self.learner_type = learner_type
         self.learner_num_estimators = learner_num_estimators
         self.learner_eta = learner_eta
         self.learner_v_mode = learner_v_mode
@@ -891,14 +888,14 @@ class MonoBoostEnsemble():
             # loss
             for est_monolearn in est.estimators:
                 comp_pts_indx = np.arange(X_sub.shape[0])[np.asarray([
-                        True if est_monolearn.comparator.compare(
+                    True if est_monolearn.comparator.compare(
                         est_monolearn.x_base, X_sub[i_, :]
-                        ) * est_monolearn.dirn in [0, 1] else False 
-                        for i_ in np.arange(X_sub.shape[0])])]
+                    ) * est_monolearn.dirn in [0, 1] else False
+                    for i_ in np.arange(X_sub.shape[0])])]
                 if self.loss_ == 'deviance':
                     coef_in = 0.5 * np.sum(res_train_sub[comp_pts_indx]
-                        ) / np.sum(np.abs(res_train_sub[comp_pts_indx]) * 
-                        (1 - np.abs(res_train_sub[comp_pts_indx])))
+                                           ) / np.sum(np.abs(res_train_sub[comp_pts_indx]) *
+                                                      (1 - np.abs(res_train_sub[comp_pts_indx])))
                 elif self.loss_ == 'rmse':
                     coef_in = np.median(
                         y_std[comp_pts_indx] - curr_ttls[comp_pts_indx])
@@ -907,7 +904,7 @@ class MonoBoostEnsemble():
                 # Update function totals (for ALL, not just subsample)
                 [pred_, is_comp] = est_monolearn.predict_proba(X_scaled)
                 curr_ttls = curr_ttls + self.eta * pred_
-                if self.standardise:  # unscale this estimator 
+                if self.standardise:  # unscale this estimator
                     est_monolearn.x_base = self.scale.unscale(
                         est_monolearn.x_base)
                     est_monolearn.nmt_hyperplane = self.scale.scale(
@@ -944,7 +941,7 @@ class MonoBoostEnsemble():
             ``dtype=np.float32`` and if a sparse matrix is provided
             to a sparse ``csr_matrix``.
         cum : boolean, (default=False)
-            True to include all predictions for all stages. 
+            True to include all predictions for all stages.
         Returns
         -------
         y : array of shape = [n_samples] or [n_samples, n_outputs]
@@ -1006,6 +1003,3 @@ def robust_sign(y):
         replace = -1 if -1 not in uniq else 1
         y_[y_ == 0] = replace
     return y_
-
-
-
