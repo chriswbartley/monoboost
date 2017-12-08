@@ -8,6 +8,7 @@ The monotone classification algorithms implemented here are described in the pap
     F(\textbf{x})=sign(a_0 + \sum_{m=1}^{M}a_m f_m(\textbf{x}))
 
 where each rule is based on some base point x_m and a conical constraint on the non-monotone features of the form
+
 .. math::
     f_m(\textbf{x},\textbf{z})= \textbf{1}  \big[ \textbf{x}\succeq \textbf{x}_m \: \land \: \textbf{z} \in\{\textbf{z} \mid  \textbf{w}_m^T\Delta\textbf{z} \le \textbf{v}_m^T\Delta\textbf{x}  \} \big]
 
