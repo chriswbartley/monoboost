@@ -1,2 +1,3 @@
 numpy
 cvxopt
+sphinx_gallery
