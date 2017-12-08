@@ -796,7 +796,7 @@ class MonoBoostEnsemble():
         self.standardise = standardise
         np.random.seed(self.random_state)
         self.loss = 'auto'
-        
+
     @property
     def y_maj_class_calc(self):
         """I'm the 'x' property."""
