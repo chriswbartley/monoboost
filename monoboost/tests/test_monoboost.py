@@ -37,7 +37,7 @@ def load_data_set():
         thresh = 21  # middle=21
         y_class[y_class < thresh] = -1
         y_class[y_class >= thresh] = +1
-    return X[0:max_N,:], y_class[0:max_N], incr_feats, decr_feats
+    return X[0:max_N, :], y_class[0:max_N], incr_feats, decr_feats
 
 
 # Load data
