@@ -1,17 +1,20 @@
 
-This is a theory section
+Theory
 ========================
 
-I might want to describe some equations: 
+The monotone classification algorithms implemented here are described in the paper paper [bartley2017]_. The resulting binary classifier takes the form:
 
 .. math::
+    F(\textbf{x})=sign(a_0 + \sum_{m=1}^{M}a_m f_m(\textbf{x}))
 
-    \int_0^\infty e^{-x^2} dx=\frac{\sqrt{\pi}}{2}
+where each rule is based on some base point x_m and a conical constraint on the non-monotone features of the form
+.. math::
+    f_m(\textbf{x},\textbf{z})= \textbf{1}  \big[ \textbf{x}\succeq \textbf{x}_m \: \land \: \textbf{z} \in\{\textbf{z} \mid  \textbf{w}_m^T\Delta\textbf{z} \le \textbf{v}_m^T\Delta\textbf{x}  \} \big]
 
 
-And refer to a paper [author2015]_.
 
 
-.. [author2015] first a., second a., cheese b. (2015). The title of their 
-                paper. Journal of papers, *15*: 1023-1049.
+.. [bartley2017] Bartley C., Liu W., Reynolds M. (2017). 
+A Novel Framework for Partially Monotone Rule
+Ensembles. ICDE submission, prepub, http://staffhome.ecm.uwa.edu.au/~19514733/
 
