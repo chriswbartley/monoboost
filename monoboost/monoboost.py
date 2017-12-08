@@ -753,7 +753,7 @@ class MonoBoostEnsemble():
                  n_feats,
                  incr_feats,
                  decr_feats,
-                 num_estimators=10,
+                 num_estimators=100,
                  fit_algo='L2-one-class',
                  eta=1.,
                  vs=[0.001,
@@ -764,7 +764,7 @@ class MonoBoostEnsemble():
                  verbose=False,
                  learner_incomp_pred_type='default',
                  learner_type='one-sided',
-                 learner_num_estimators=20,
+                 learner_num_estimators=10,
                  learner_eta=1.0,
                  learner_v_mode='random',
                  sample_fract=1.0,
@@ -796,6 +796,11 @@ class MonoBoostEnsemble():
         self.standardise = standardise
         np.random.seed(self.random_state)
         self.loss = 'auto'
+        
+    @property
+    def y_maj_class_calc(self):
+        """I'm the 'x' property."""
+        return -1 if np.sum(self.y == -1) / len(self.y) >= 0.5 else +1
 
     def fit(self, X, y):
         """Fits one hyperplane per non-monotone feature

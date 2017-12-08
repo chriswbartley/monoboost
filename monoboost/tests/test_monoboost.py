@@ -1,15 +1,96 @@
 from __future__ import absolute_import, division, print_function
 import os.path as op
-# import numpy as np
-# import pandas as pd
+import numpy as np
+import pandas as pd
 import numpy.testing as npt
 import monoboost as mb
+from sklearn.datasets import load_boston
 
-data_path = op.join(mb.__path__[0], 'data')
+def load_data_set():
+    # Load data
+    data = load_boston()
+    y = data['target']
+    X = data['data'] 
+    features =data['feature_names']
+    multi_class=False
+    # Specify monotone features
+    incr_feat_names=['RM','RAD']
+    decr_feat_names=['CRIM','DIS','LSTAT']
+    # get 1 based indices of incr and decr feats
+    incr_feats=[i+1 for i in np.arange(len(features)) if 
+                features[i] in incr_feat_names]
+    decr_feats=[i+1 for i in np.arange(len(features)) if 
+                features[i] in decr_feat_names] 
+    # Convert to classification problem
+    if multi_class:
+        y_class=y.copy()
+        thresh1=15 
+        thresh2=21
+        thresh3=27
+        y_class[y>thresh3]=3
+        y_class[np.logical_and(y>thresh2,y<=thresh3)]=2
+        y_class[np.logical_and(y>thresh1,y<=thresh2)]=1
+        y_class[y<=thresh1]=0
+    else: # binary
+        y_class=y.copy()
+        thresh=21 # middle=21 
+        y_class[y_class<thresh]=-1
+        y_class[y_class>=thresh]=+1
+    return X,y_class,incr_feats,decr_feats
 
+# Load data
+X, y, incr_feats, decr_feats = load_data_set()
+    
+def test_model_fit():
+    # Specify hyperparams for model solution
+    vs=[0.01,0.1,0.2,0.5,1]
+    etas=[0.06,0.125,0.25,0.5,1]
+    eta=etas[2]
+    learner_type='two-sided'
+    max_iters=5
+    # Solve model
+    mb_clf=mb.MonoBoost(n_feats=X.shape[1],incr_feats=incr_feats,
+                        decr_feats=decr_feats,num_estimators=max_iters,
+                        fit_algo='L2-one-class',eta=eta,vs=vs,
+                        verbose=False,learner_type=learner_type)
+    mb_clf.fit(X,y)  
+    # Assess fit
+    y_pred = mb_clf.predict(X)
+    acc = np.sum(y==y_pred)/len(y)
+    npt.assert_almost_equal(acc, 0.68774703)
 
-def test_transform_data():
-    npt.assert_equal(1, 1)
+def test_ensemble_model_fit():
+    # Specify hyperparams for model solution
+    vs=[0.01,0.1,0.2,0.5,1]
+    etas=[0.06,0.125,0.25,0.5,1]
+    eta=etas[2]
+    learner_type='one-sided'
+    num_estimators=10
+    learner_num_estimators=2
+    learner_eta=0.5
+    learner_v_mode='random'
+    sample_fract=0.5
+    random_state=1
+    standardise=True
+    # Solve model
+    mb_clf=mb.MonoBoostEnsemble(n_feats=X.shape[1],incr_feats=incr_feats,
+                                decr_feats=decr_feats,
+                                num_estimators=num_estimators,
+                                fit_algo='L2-one-class',eta=eta,vs=vs,
+                                verbose=False,learner_type=learner_type,
+                                learner_num_estimators=learner_num_estimators,
+                                learner_eta=learner_eta,
+                                learner_v_mode=learner_v_mode,
+                                sample_fract=sample_fract,
+                                random_state=random_state,
+                                standardise=standardise)
+    mb_clf.fit(X,y)  
+    # Assess fit
+    y_pred = mb_clf.predict(X)
+    acc = np.sum(y==y_pred)/len(y)
+    npt.assert_almost_equal(acc, 0.72924901185770752)
+    
+#test_ensemble_model_fit()
 # def test_transform_data():
 #    """
 #    Testing the transformation of the data from raw data to functions
