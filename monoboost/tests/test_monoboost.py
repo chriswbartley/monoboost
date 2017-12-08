@@ -8,7 +8,7 @@ from sklearn.datasets import load_boston
 
 def load_data_set():
     # Load data
-    max_N=200
+    max_N = 200
     data = load_boston()
     y = data['target']
     X = data['data']
