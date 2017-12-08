@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
-import pandas as pd
 import numpy.testing as npt
 import monoboost as mb
 from sklearn.datasets import load_boston
@@ -9,6 +8,7 @@ from sklearn.datasets import load_boston
 
 def load_data_set():
     # Load data
+    max_N=200
     data = load_boston()
     y = data['target']
     X = data['data']
@@ -37,7 +37,7 @@ def load_data_set():
         thresh = 21  # middle=21
         y_class[y_class < thresh] = -1
         y_class[y_class >= thresh] = +1
-    return X, y_class, incr_feats, decr_feats
+    return X[0:max_N,:], y_class[0:max_N], incr_feats, decr_feats
 
 
 # Load data
@@ -50,7 +50,7 @@ def test_model_fit():
     etas = [0.06, 0.125, 0.25, 0.5, 1]
     eta = etas[2]
     learner_type = 'two-sided'
-    max_iters = 5
+    max_iters = 3
     # Solve model
     mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
                           decr_feats=decr_feats, num_estimators=max_iters,
@@ -60,7 +60,7 @@ def test_model_fit():
     # Assess fit
     y_pred = mb_clf.predict(X)
     acc = np.sum(y == y_pred) / len(y)
-    npt.assert_almost_equal(acc, 0.68774703)
+    npt.assert_almost_equal(acc, 0.70999999999)
 
 
 def test_ensemble_model_fit():
@@ -69,7 +69,7 @@ def test_ensemble_model_fit():
     etas = [0.06, 0.125, 0.25, 0.5, 1]
     eta = etas[2]
     learner_type = 'one-sided'
-    num_estimators = 10
+    num_estimators = 6
     learner_num_estimators = 2
     learner_eta = 0.5
     learner_v_mode = 'random'
@@ -97,7 +97,7 @@ def test_ensemble_model_fit():
     # Assess fit
     y_pred = mb_clf.predict(X)
     acc = np.sum(y == y_pred) / len(y)
-    npt.assert_almost_equal(acc, 0.72924901185770752)
+    npt.assert_almost_equal(acc, 0.6949999999)
 
 # test_ensemble_model_fit()
 # def test_transform_data():
