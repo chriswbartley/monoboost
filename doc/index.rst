@@ -3,15 +3,10 @@
 Welcome to monoboost's documentation!
 ====================================
 
-`Monoboost` is a template for a small scientific Python project. 
+`Monoboost` is the first instance based classification algorithm that allows for PARTIAL monotonicity (i.e. some NON-monotone features). It uses standard inequality constraints on the monotone features, and novel L1 cones to place sensible constraints on non-monotone features.
 
-To see how to use it, please refer to the `README file 
-<https://github.com/chriswbartley/monoboost/blob/master/README.md>`_ in the Github repository.
-
-This is an example of documentation of the software, using sphinx_. 
-
-.. _sphinx: http://sphinx-doc.org/
-
+This site documents the package, or refer to the `README file 
+<https://github.com/chriswbartley/monoboost/blob/master/README.md>`_ in the Github repository for an even briefer introduction.
 
 Contents:
 
