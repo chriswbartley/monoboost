@@ -2,3 +2,4 @@ numpy
 cvxopt
 sphinx_gallery
 pandas
+sklearn
