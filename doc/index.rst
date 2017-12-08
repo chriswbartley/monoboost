@@ -3,7 +3,7 @@
 Welcome to monoboost's documentation!
 ====================================
 
-`Monoboost` is the first instance based classification algorithm that allows for PARTIAL monotonicity (i.e. some NON-monotone features). It uses standard inequality constraints on the monotone features, and novel L1 cones to place sensible constraints on non-monotone features.
+`Monoboost` is the first instance based classification algorithm that allows for *partial* monotonicity (i.e. some *non*-monotone features). It uses standard inequality constraints on the monotone features, and novel L1 cones to place sensible constraints on non-monotone features.
 
 This site documents the package, or refer to the `README file 
 <https://github.com/chriswbartley/monoboost/blob/master/README.md>`_ in the Github repository for an even briefer introduction.
