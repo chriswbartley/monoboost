@@ -244,7 +244,7 @@ The `Makefile` contains an instruction for running this command as well:
 
 ### Documentation
 
-Documenting your software is a good idea. Not only as a way to communicate to
+Documentation is provided [here](http://monoboost.readthedocs.io/en/latest/index.html), Documenting your software is a good idea. Not only as a way to communicate to
 others about how to use the software, but also as a way of reminding yourself
 what the issues are that you faced, and how you dealt with them, in a few
 months/years, when you return to look at the code.
