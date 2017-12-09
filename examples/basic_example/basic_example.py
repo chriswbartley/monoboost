@@ -64,7 +64,9 @@ y[y>=21]=+1
 # We suspect that the number of rooms (6. RM) and the highway 
 # accessibility (9. RAD) would, if anything, increase the price of a house
 # (all other things being equal). Likewise we suspect that crime rate (1.
-# CRIM), distance from employment (8. DIS) and percentage of lower status residents (13. LSTAT) would be likely to, if anything, decrease house prices. So we have:
+# CRIM), distance from employment (8. DIS) and percentage of lower status
+# residents (13. LSTAT) would be likely to, if anything, decrease house prices.
+# So we have:
 
 incr_feats=[6,9]
 decr_feats=[1,8,13]
