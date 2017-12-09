@@ -45,8 +45,8 @@ features = data['feature_names']
 ###########################################################################
 # The output is MEDV - Median value of owner-occupied homes in $1000's, but we convert it to a binary y in +/-1 indicating whether MEDV is less than $21(,000):
 
-y=y[y< 21] # convert real output to 50-50 binary classification
-y[y==0]=-1 # to make y=+/-1
+y[y< 21]=-1 # convert real output to 50-50 binary classification
+y[y>=21]=+1 
 
 ###############################################################################
 # We suspect that the number of rooms (6. RM) and the highway 
