@@ -59,9 +59,9 @@ incr_feats=[6,9]
 decr_feats=[1,8,13]
 
 ###############################################################################
-# Specify and fit a MonoBoost model
+# Fit a MonoBoost model
 # -------------------------
-# We now initialise our classifier. To understand the hyperparameters, please
+# We now fit our classifier. To understand the hyperparameters, please
 # refer to the original paper available 
 # `here <http://staffhome.ecm.uwa.edu.au/~19514733/>`_:
 
@@ -81,9 +81,11 @@ y_pred = mb_clf.predict(X)
 acc = np.sum(y == y_pred) / len(y)
 
 ###############################################################################
-# Specify and fit a MonoBoostEnsemble model
+# Fit a MonoBoostEnsemble model
 # -------------------------
-# We now initialise our classifier:
+# We now fit our classifier. To understand the hyperparameters, please
+# refer to the original paper available 
+# `here <http://staffhome.ecm.uwa.edu.au/~19514733/>`_:
 
 # Specify hyperparams for model solution
 vs = [0.01, 0.1, 0.2, 0.5, 1]
