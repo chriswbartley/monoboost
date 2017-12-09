@@ -24,7 +24,7 @@ features = data['feature_names']
 
 ###############################################################################
 # Specify the monotone features
-# ---------------------------------
+# -------------------------
 #
 # There are 13 predictors for house price in the Boston dataset:
 ##. CRIM - per capita crime rate by town
