@@ -18,7 +18,7 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest pytest-cov cvxopt scikit-learn"
   - activate test-environment
   - pip install coverage
-  - pip install --upgrade --force-reinstall "numpy-1.10.2+mkl-cp35-none-win32.whl"
+  - pip install --upgrade --force-reinstall "numpy-1.13.1+mkl-cp35-none-win32.whl"
   - python setup.py install
 
 test_script:
