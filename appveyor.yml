@@ -18,6 +18,9 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest pytest-cov cvxopt scikit-learn"
   - activate test-environment
   - pip install coverage
+  # sklearn needs numpy with MKL hich amazingly needs a custom wheel
+  # from http://www.lfd.uci.edu/~gohlke/pythonlibs/ , we store a copy
+  # on dropbox:
   - pip install --upgrade --force-reinstall "https://dl.dropboxusercontent.com/s/ot5tj14jhrqfbvj/numpy-1.13.3%2Bmkl-cp35-cp35m-win32.whl?dl=0"
   - python setup.py install
 
