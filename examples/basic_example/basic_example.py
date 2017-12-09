@@ -27,6 +27,7 @@ features = data['feature_names']
 # -------------------------
 # There are 13 predictors for house price in the Boston dataset:
 
+###############################################################################
 ##. CRIM - per capita crime rate by town
 ##. ZN - proportion of residential land zoned for lots over 25,000 sq.ft.
 ##. INDUS - proportion of non-retail business acres per town.
