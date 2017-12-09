@@ -46,29 +46,6 @@ features = data['feature_names']
 # convert it to a binary y in +/-1 indicating whether MEDV is less than 
 # $21(,000):
 
-###############################################################################
-# Specify the monotone features
-# -------------------------
-#
-# There are 13 predictors for house price in the Boston dataset:
-##. CRIM - per capita crime rate by town
-##. ZN - proportion of residential land zoned for lots over 25,000 sq.ft.
-##. INDUS - proportion of non-retail business acres per town.
-##. CHAS - Charles River dummy variable (1 if tract bounds river; 0 otherwise)
-##. NOX - nitric oxides concentration (parts per 10 million)
-##. RM - average number of rooms per dwelling
-##. AGE - proportion of owner-occupied units built prior to 1940
-##. DIS - weighted distances to five Boston employment centres
-##. RAD - index of accessibility to radial highways
-##. TAX - full-value property-tax rate per $10,000
-##. PTRATIO - pupil-teacher ratio by town
-##. B - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
-##. LSTAT - % lower status of the population
-#
-# The output is MEDV - Median value of owner-occupied homes in $1000's, but we 
-# convert it to a binary y in +/-1 indicating whether MEDV is less than 
-# $21(,000):
-
 y[y< 21]=-1 # convert real output to 50-50 binary classification
 y[y>=21]=+1 
 
@@ -84,7 +61,9 @@ decr_feats=[1,8,13]
 ###############################################################################
 # Specify and fit a MonoBoost model
 # -------------------------
-# We now initialise our classifier:
+# We now initialise our classifier. To understand the hyperparameters, please
+# refer to the original paper available 
+# `here <http://staffhome.ecm.uwa.edu.au/~19514733/>`_:
 
 # Specify hyperparams for model solution
 vs = [0.01, 0.1, 0.2, 0.5, 1]
