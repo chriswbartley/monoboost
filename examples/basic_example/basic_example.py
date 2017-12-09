@@ -3,7 +3,14 @@
 How to fit a basic model
 ======================================
 
-These examples show how to fit a model using MonoBoost. There are two model types: `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits `num_estimators` partially monotone cone rules to the dataset using gradient boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each of size `learner_num_estimators` (up to a total of `num_estimators`) using gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added feature of stochastic subsampling of fraction `sample_fract` after every `learner_num_estimators` cones.
+These examples show how to fit a model using MonoBoost. There are two model
+ types: `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits
+ `num_estimators` partially monotone cone rules to the dataset using gradient
+ boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each
+ of size `learner_num_estimators` (up to a total of `num_estimators`) using
+ gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added
+ feature of stochastic subsampling of fraction `sample_fract` after every
+ `learner_num_estimators` cones.
 """
 
 import numpy as np
@@ -14,7 +21,11 @@ from sklearn.datasets import load_boston
 # Load the data
 # ----------------
 #
-# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`_, and convert the output from real valued (regression) to binary classification with roughly 50-50 class distribution:
+# First we load the standard data source on 
+# `Boston Housing 
+# <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`_, and 
+# convert the output from real valued (regression) to binary classification 
+# with roughly 50-50 class distribution:
 #
 
 data = load_boston()
