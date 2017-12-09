@@ -3,22 +3,89 @@
 How to fit a basic model
 ======================================
 
-These examples show how to fit a model using MonoBoost. There are two model types: simple `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits `num_estimators` partially monotone cone rules to the dataset using gradient boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each of size `learner_num_estimators` (up to a total of `num_estimators`) using gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added feature of stochastic subsampling of fraction `sample_fract`.
+These examples show how to fit a model using MonoBoost. There are two model types: `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits `num_estimators` partially monotone cone rules to the dataset using gradient boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each of size `learner_num_estimators` (up to a total of `num_estimators`) using gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added feature of stochastic subsampling of fraction `sample_fract` after every `learner_num_estimators` cones.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+import numpy.testing as npt
+import monoboost as mb
+from sklearn.datasets import load_boston
 
 ###############################################################################
-# reStructuredText
+# Load the data
 # ----------------
 #
-# The primary benefit of sphinx-gallery is that it allows you to interweave
-# `reStructuredText <http://docutils.sourceforge.net/rst.html>`_ along with
-# your regular python code. This means that you can include formatted text
-# with the script, all using regular text files. rST has a particular structure
-# it expects in order to render properly (it is what sphinx uses as well).
+# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`.
 #
+
+    data = load_boston()
+    y = data['target']
+    X = data['data']
+    features = data['feature_names']
+
+###############################################################################
+# Specify the monotone features
+# ----------------
+#
+# There are 14 predictors for house price in the Boston dataset:
+# 1. CRIM - per capita crime rate by town
+# 2. ZN - proportion of residential land zoned for lots over 25,000 sq.ft.
+# 3. INDUS - proportion of non-retail business acres per town.
+# 4. CHAS - Charles River dummy variable (1 if tract bounds river; 0 otherwise)
+# 5. NOX - nitric oxides concentration (parts per 10 million)
+# 6. RM - average number of rooms per dwelling
+# 7. AGE - proportion of owner-occupied units built prior to 1940
+# 8. DIS - weighted distances to five Boston employment centres
+# 9. RAD - index of accessibility to radial highways
+# 10. TAX - full-value property-tax rate per $10,000
+# 11. PTRATIO - pupil-teacher ratio by town
+# 12. B - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+# 13. LSTAT - % lower status of the population
+MEDV - Median value of owner-occupied homes in $1000's
+#
+# We suspect that the number of rooms (6. RM) and the highway 
+# accessibility (9. RAD) would, if anything, increase the price of a house
+# (all other things being equal). Likewise we suspect that crime rate (1.
+# CRIM), distance from employment (8. DIS) and percentage of lower status residents (13. LSTAT) would be likely to, if anything, decrease house prices. So 
+
+    data = load_boston()
+    y = data['target']
+    X = data['data']
+    features = data['feature_names']
+
+    multi_class = False
+    # Specify monotone features
+    incr_feat_names = ['RM', 'RAD']
+    decr_feat_names = ['CRIM', 'DIS', 'LSTAT']
+    # get 1 based indices of incr and decr feats
+    incr_feats = [i + 1 for i in np.arange(len(features)) if
+                  features[i] in incr_feat_names]
+    decr_feats = [i + 1 for i in np.arange(len(features)) if
+                  features[i] in decr_feat_names]
+    # Convert to classification problem
+    if multi_class:
+        y_class = y.copy()
+        thresh1 = 15
+        thresh2 = 21
+        thresh3 = 27
+        y_class[y > thresh3] = 3
+        y_class[np.logical_and(y > thresh2, y <= thresh3)] = 2
+        y_class[np.logical_and(y > thresh1, y <= thresh2)] = 1
+        y_class[y <= thresh1] = 0
+    else:  # binary
+        y_class = y.copy()
+        thresh = 21  # middle=21
+        y_class[y_class < thresh] = -1
+        y_class[y_class >= thresh] = +1
+    return X[0:max_N, :], y_class[0:max_N], incr_feats, decr_feats
+
+
+# Load data
+X, y, incr_feats, decr_feats = load_data_set()
+
+###############################################################################
+
+
 # File headers and naming
 # -----------------------
 # Sphinx-gallery files must be initialized with a header like the one above.
