@@ -65,10 +65,10 @@ decr_feats=[1,8,13]
 vs = [0.01, 0.1, 0.2, 0.5, 1]
 eta = 0.25
 learner_type = 'two-sided'
-max_iters = 10
+num_estimators = 10
 # Solve model
 mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
-                          decr_feats=decr_feats, num_estimators=max_iters,
+                          decr_feats=decr_feats, num_estimators=num_estimators,
                           fit_algo='L2-one-class', eta=eta, vs=vs,
                           verbose=False, learner_type=learner_type)
 mb_clf.fit(X, y)
@@ -89,13 +89,31 @@ acc = np.sum(y == y_pred) / len(y)
 # Specify hyperparams for model solution
 vs = [0.01, 0.1, 0.2, 0.5, 1]
 eta = 0.25
-learner_type = 'two-sided'
-max_iters = 10
+learner_type = 'one-sided'
+num_estimators = 10
+learner_num_estimators = 2
+learner_eta = 0.25
+learner_v_mode = 'random'
+sample_fract = 0.5
+random_state = 1
+standardise = True
 # Solve model
-mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
-                          decr_feats=decr_feats, num_estimators=max_iters,
-                          fit_algo='L2-one-class', eta=eta, vs=vs,
-                          verbose=False, learner_type=learner_type)
+mb_clf = mb.MonoBoostEnsemble(
+    n_feats=X.shape[1],
+    incr_feats=incr_feats,
+    decr_feats=decr_feats,
+    num_estimators=num_estimators,
+    fit_algo='L2-one-class',
+    eta=eta,
+    vs=vs,
+    verbose=False,
+    learner_type=learner_type,
+    learner_num_estimators=learner_num_estimators,
+    learner_eta=learner_eta,
+    learner_v_mode=learner_v_mode,
+    sample_fract=sample_fract,
+    random_state=random_state,
+    standardise=standardise)
 mb_clf.fit(X, y)
 
 ###############################################################################
@@ -109,4 +127,8 @@ acc = np.sum(y == y_pred) / len(y)
 ###############################################################################
 # Final notes
 # -----------------------
-# In a real scenario we would use a hold out technique such as cross-validation to tune the hyperparameters `v`, `eta` and `max_iters` but this is standard practice and not covered in these basic examples. Enjoy!
+# In a real scenario we would use a hold out technique such as cross-validation 
+# to tune the hyperparameters `v`, `eta` and `num_estimators` but this is 
+# standard practice and not covered in these basic examples. Note that for 
+# tuning `num_estimators` we can use `predict(X,cum=True)` because as standard 
+# for boosting, the stagewise predictions are stored. Enjoy!
