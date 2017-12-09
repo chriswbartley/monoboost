@@ -71,5 +71,5 @@ MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
 PACKAGE_DATA = {'monoboost': [pjoin('data', '*')]}
-REQUIRES = ["numpy=1.13.3"]
+REQUIRES = ["numpy"]
 INSTALL_REQUIRES = ["numpy","scipy","scikit-learn"]
