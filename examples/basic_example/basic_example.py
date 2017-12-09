@@ -27,9 +27,9 @@ features = data['feature_names']
 # -------------------------
 #
 # There are 13 predictors for house price in the Boston dataset:
-# 1. CRIM - per capita crime rate by town
-# 2. ZN - proportion of residential land zoned for lots over 25,000 sq.ft.
-# 3. INDUS - proportion of non-retail business acres per town.
+# # CRIM - per capita crime rate by town
+# # ZN - proportion of residential land zoned for lots over 25,000 sq.ft.
+# # INDUS - proportion of non-retail business acres per town.
 # 4. CHAS - Charles River dummy variable (1 if tract bounds river; 0 otherwise)
 # 5. NOX - nitric oxides concentration (parts per 10 million)
 # 6. RM - average number of rooms per dwelling
