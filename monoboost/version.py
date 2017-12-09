@@ -52,7 +52,7 @@ for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (c) 2015--, Christopher Bartley, The University of Western Australia.
+Copyright (c) 2017--, Christopher Bartley, The University of Western Australia.
 """
 
 NAME = "MonoBoost"
@@ -71,4 +71,4 @@ MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
 PACKAGE_DATA = {'monoboost': [pjoin('data', '*')]}
-REQUIRES = ["numpy","sklearn"]
+REQUIRES = ["numpy","scipy","sklearn"]
