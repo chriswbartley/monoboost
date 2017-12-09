@@ -57,7 +57,7 @@ incr_feats=[6,9]
 decr_feats=[1,8,13]
 
 ###############################################################################
-# Specify and fit the model
+# Specify and fit the model (MonoBoost)
 # -------------------------
 # We now initialise our classifier:
 
@@ -74,7 +74,32 @@ mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
 mb_clf.fit(X, y)
 
 ###############################################################################
-# Assess the model
+# Assess the model (MonoBoost)
+# -----------------------
+# To assess the model we can now use `predict()`:
+
+y_pred = mb_clf.predict(X)
+acc = np.sum(y == y_pred) / len(y)
+
+###############################################################################
+# Specify and fit the model (MonoBoostEnsemble)
+# -------------------------
+# We now initialise our classifier:
+
+# Specify hyperparams for model solution
+vs = [0.01, 0.1, 0.2, 0.5, 1]
+eta = 0.25
+learner_type = 'two-sided'
+max_iters = 10
+# Solve model
+mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
+                          decr_feats=decr_feats, num_estimators=max_iters,
+                          fit_algo='L2-one-class', eta=eta, vs=vs,
+                          verbose=False, learner_type=learner_type)
+mb_clf.fit(X, y)
+
+###############################################################################
+# Assess the model (MonoBoostEnsemble)
 # -----------------------
 # To assess the model we can now use `predict()`:
 
