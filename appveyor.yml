@@ -18,7 +18,7 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest pytest-cov cvxopt scikit-learn"
   - activate test-environment
   - pip install coverage
-  - pip install --upgrade --force-reinstall "https://download.lfd.uci.edu/pythonlibs/yjwkc9i2/numpy-1.13.3+mkl-cp34-cp34m-win32.whl"
+  - pip install --upgrade --force-reinstall "https://www.dropbox.com/s/ot5tj14jhrqfbvj/numpy-1.13.3%2Bmkl-cp35-cp35m-win32.whl?dl=0"
   - python setup.py install
 
 test_script:
@@ -31,5 +31,5 @@ cache:
   # the MKL numpy and scipy wheels mirrored on a rackspace cloud
   # container, speed up the appveyor jobs and reduce bandwidth
   # usage on our rackspace account.
-  - '%APPDATA%\pip\Cache'
+  - '%APPDATA%\Cache'
 
