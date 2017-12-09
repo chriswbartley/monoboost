@@ -19,6 +19,7 @@ install:
   - activate test-environment
   - pip install coverage
   - pip install --upgrade --force-reinstall "https://dl.dropboxusercontent.com/s/ot5tj14jhrqfbvj/numpy-1.13.3%2Bmkl-cp35-cp35m-win32.whl?dl=0"
+  - dir
   - python setup.py install
 
 test_script:
