@@ -1,6 +1,6 @@
 ## monoboost
 [![Build Status](https://travis-ci.org/chriswbartley/monoboost.svg?branch=master)](https://travis-ci.org/chriswbartley/monoboost)
-[![Appveyor Status](https://ci.appveyor.com/api/projects/status/github/chriswbartley/monoboost)](https://ci.appveyor.com/api/projects/status/github/chriswbartley/monoboost)
+[![Appveyor Status](https://ci.appveyor.com/api/projects/status/github/chriswbartley/monoboost)](https://ci.appveyor.com/project/chriswbartley/monoboost)
 [![RTD Status](https://readthedocs.org/projects/monoboost/badge/?version=latest
 )](https://readthedocs.org/projects/monoboost/badge/?version=latest)
 
