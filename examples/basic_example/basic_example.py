@@ -15,7 +15,7 @@ from sklearn.datasets import load_boston
 # Load the data
 # ----------------
 #
-# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`.
+# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`_.
 #
 
     data = load_boston()
@@ -46,7 +46,7 @@ MEDV - Median value of owner-occupied homes in $1000's
 # We suspect that the number of rooms (6. RM) and the highway 
 # accessibility (9. RAD) would, if anything, increase the price of a house
 # (all other things being equal). Likewise we suspect that crime rate (1.
-# CRIM), distance from employment (8. DIS) and percentage of lower status residents (13. LSTAT) would be likely to, if anything, decrease house prices. So 
+# CRIM), distance from employment (8. DIS) and percentage of lower status residents (13. LSTAT) would be likely to, if anything, decrease house prices. So we have `incr_feats=[6,9]` and `decr_feats=[1,8,13]`.
 
     data = load_boston()
     y = data['target']
