@@ -19,15 +19,6 @@ install:
   - activate test-environment
   - pip install coverage
   - pip install --upgrade --force-reinstall "https://dl.dropboxusercontent.com/s/ot5tj14jhrqfbvj/numpy-1.13.3%2Bmkl-cp35-cp35m-win32.whl?dl=0"
-  - cd C:\Users\appveyor\AppData\Roaming\
-  - dir
-  - cd ..
-  - cd Local
-  - dir
-  - cd pip
-  - dir
-  - cd cache
-  - dir
   - python setup.py install
 
 test_script:
@@ -39,6 +30,7 @@ cache:
   # Use the appveyor cache to avoid re-downloading large archives such
   # the MKL numpy and scipy wheels mirrored on a rackspace cloud
   # container, speed up the appveyor jobs and reduce bandwidth
-  # usage on our rackspace account.
-  - '%APPDATA%\pip\Cache'
+  # usage on our rackspace account. (was: '%APPDATA%\pip\Cache', but 
+  # that refers to Roaming, our pip cache is in Local
+  - C:\Users\appveyor\AppData\Local\pip\cache
 
