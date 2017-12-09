@@ -22,10 +22,9 @@ y = data['target']
 X = data['data']
 features = data['feature_names']
 
-   
-###########################################################################
+###############################################################################
 # Specify the monotone features
-# -----------------------------
+# -------------------------------
 #
 # There are 13 predictors for house price in the Boston dataset:
 # 1. CRIM - per capita crime rate by town
@@ -42,7 +41,7 @@ features = data['feature_names']
 # 12. B - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
 # 13. LSTAT - % lower status of the population
 #
-###########################################################################
+###############################################################################
 # The output is MEDV - Median value of owner-occupied homes in $1000's, but we convert it to a binary y in +/-1 indicating whether MEDV is less than $21(,000):
 
 y[y< 21]=-1 # convert real output to 50-50 binary classification
