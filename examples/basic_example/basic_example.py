@@ -57,7 +57,6 @@ y[y==0]=-1 # to make y=+/-1
 incr_feats=[6,9]
 decr_feats=[1,8,13]
 
-
 ###############################################################################
 
 # Specify and fit the model
@@ -86,6 +85,7 @@ y_pred = mb_clf.predict(X)
 acc = np.sum(y == y_pred) / len(y)
 
 ###############################################################################
+
 # Final notes
 # -----------------------
 # In a real scenario we would use a hold out technique such as cross-validation to tune the hyperparameters `v`, `eta` and `max_iters` but this is standard practice and not covered in these basic examples. Enjoy!
