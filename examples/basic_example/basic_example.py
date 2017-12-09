@@ -1,13 +1,11 @@
-"""
-======================================
-How to fit a basic model
-======================================
-
-These examples show how to fit a model using MonoBoost. There are two model types: `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits `num_estimators` partially monotone cone rules to the dataset using gradient boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each of size `learner_num_estimators` (up to a total of `num_estimators`) using gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added feature of stochastic subsampling of fraction `sample_fract` after every `learner_num_estimators` cones.
-"""
+###############################################################################
+# How to fit a basic model
+# ----------------
+#
+# These examples show how to fit a model using MonoBoost. There are two model types: `MonoBoost`, and `MonoBoostEnsemble`. `MonoBoost` sequentially fits `num_estimators` partially monotone cone rules to the dataset using gradient boosting. `MonoBoostEnsemble` fits a sequence of  `MonoBoost` classifiers each of size `learner_num_estimators` (up to a total of `num_estimators`) using gradient boosting. The advantage of `MonoBoostEnsemble` is to allow the added feature of stochastic subsampling of fraction `sample_fract` after every `learner_num_estimators` cones.
+#
 
 import numpy as np
-import numpy.testing as npt
 import monoboost as mb
 from sklearn.datasets import load_boston
 
