@@ -13,14 +13,15 @@ from sklearn.datasets import load_boston
 # Load the data
 # ----------------
 #
-# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`_.
+# First we load the standard data source on `Boston Housing <https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html>`_, and convert the output from real valued (regression) to binary classification with roughly 50-50 class distribution:
 #
 
-    data = load_boston()
-    y = data['target']
-    X = data['data']
-    features = data['feature_names']
+data = load_boston()
+y = data['target']
+X = data['data']
+features = data['feature_names']
 
+   
 ###############################################################################
 # Specify the monotone features
 # ----------------
@@ -39,8 +40,13 @@ from sklearn.datasets import load_boston
 # 11. PTRATIO - pupil-teacher ratio by town
 # 12. B - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
 # 13. LSTAT - % lower status of the population
-MEDV - Median value of owner-occupied homes in $1000's
 #
+# The output is MEDV - Median value of owner-occupied homes in $1000's, but we convert it to a binary y in +/-1 indicating whether MEDV is less than $21(,000).
+
+y=y[y< 21] # convert real output to 50-50 binary classification
+y[y==0]=-1 # to make y=+/-1
+
+###############################################################################
 # We suspect that the number of rooms (6. RM) and the highway 
 # accessibility (9. RAD) would, if anything, increase the price of a house
 # (all other things being equal). Likewise we suspect that crime rate (1.
