@@ -23,6 +23,11 @@ X = data['data']
 features = data['feature_names']
 
 ###############################################################################
+# Specify and fit a MonoBoost model
+# -------------------------
+# We now initialise our classifier:
+
+###############################################################################
 # Specify the monotone features
 # -------------------------
 #
