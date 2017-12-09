@@ -25,7 +25,7 @@ features = data['feature_names']
    
 ###########################################################################
 # Specify the monotone features
-# ----------------
+# -----------------------------
 #
 # There are 13 predictors for house price in the Boston dataset:
 # 1. CRIM - per capita crime rate by town
@@ -58,9 +58,8 @@ incr_feats=[6,9]
 decr_feats=[1,8,13]
 
 ###############################################################################
-
 # Specify and fit the model
-# -----------------------
+# -------------------------
 # We now initialise our classifier:
 
 # Specify hyperparams for model solution
@@ -76,7 +75,6 @@ mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
 mb_clf.fit(X, y)
 
 ###############################################################################
-
 # Assess the model
 # -----------------------
 # To assess the model we can now use `predict()`:
@@ -85,7 +83,6 @@ y_pred = mb_clf.predict(X)
 acc = np.sum(y == y_pred) / len(y)
 
 ###############################################################################
-
 # Final notes
 # -----------------------
 # In a real scenario we would use a hold out technique such as cross-validation to tune the hyperparameters `v`, `eta` and `max_iters` but this is standard practice and not covered in these basic examples. Enjoy!
