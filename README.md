@@ -6,10 +6,10 @@
 
 
 
-Monoboost is an instance based classifier with *partial* monotonicity capability (i.e. the ability to specify non-monotone features). It uses standard inequality constraints for the monotone features, and novel L1 cones to cater for the non-monotone features. The theory is described in Bartley C., Liu W., Reynolds M., 2017, *A Novel Framework for Partially Monotone Rule Ensembles.* ICDE submission, prepub, available [here](http://staffhome.ecm.uwa.edu.au/~19514733/).
+Monoboost is an instance based classifier with *partial* monotonicity capability (i.e. the ability to specify non-monotone features). It uses standard inequality constraints for the monotone features, and novel L1 cones to cater for the non-monotone features. The theory is described in Bartley C., Liu W., Reynolds M., 2017, *A Novel Framework for Partially Monotone Rule Ensembles.* ICDE submission, prepub, available [here](http://staffhome.ecm.uwa.edu.au/~19514733/). The package contains two classifiers: `MonoBoost()`, and `MonoBoostEnsemble()`. 
 
 ### Code Example
-The package contains two classifiers: MonoBoost, and MonoBoostEnsemble. Usage is based on `scikit-learn` norms. First we define the monotone features, using the corresponding one-based array indices:
+First we define the monotone features, using the corresponding one-based array indices:
 ```
 incr_feats=[6,9]
 decr_feats=[1,8,13]
@@ -43,7 +43,7 @@ pip install monoboost
 
 ### Documentation
 
-Documentation is provided [here](http://monoboost.readthedocs.io/en/latest/index.html)
+Documentation is provided [here](http://monoboost.readthedocs.io/en/latest/index.html).
 
 ### Contributors
 
