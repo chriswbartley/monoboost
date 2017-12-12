@@ -52,7 +52,7 @@ Pull requests welcome! This is a proof of concept implementation and in need of 
 [PEP8 code formatting standard](https://www.python.org/dev/peps/pep-0008/), and
 we enforce this by running a code-linter called
 [`flake8`](http://flake8.pycqa.org/en/latest/) during continuous integration.
- - Continuous integration is used to run the tests in `/monoboost/tests/test_monoboost.py`, using Travis (linux) and Appveyor (windows).
+ - Continuous integration is used to run the tests in `/monoboost/tests/test_monoboost.py`, using [Travis](https://travis-ci.org/chriswbartley/monoboost.svg?branch=master) (Linux) and [Appveyor](https://ci.appveyor.com/api/projects/status/github/chriswbartley/monoboost) (Windows).
  
 ### License
 BSD 3 Clause, Copyright (c) 2017, Christopher Bartley
