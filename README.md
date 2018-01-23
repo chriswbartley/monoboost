@@ -8,7 +8,9 @@ Monoboost is an instance based classifier with *partial* monotonicity capability
 
 You are more than welcome to make use of this code for research purposes. If so, please cite:
 
-Bartley C., Liu W., Reynolds M., 2018, A Novel Framework for Partially Monotone Rule Ensembles. ICDE 2018 prepub Paris, France, April 16-20, 2018, IEEE Computer Society. It is available in PDF [here](http://staffhome.ecm.uwa.edu.au/~19514733/). 
+Bartley C., Liu W., Reynolds M., 2018, A Novel Framework for Partially Monotone Rule Ensembles. ICDE 2018 prepub Paris, France, April 16-20, 2018, IEEE Computer Society. 
+
+The paper is available in PDF [here](http://staffhome.ecm.uwa.edu.au/~19514733/). 
 
 
 ### Code Example
