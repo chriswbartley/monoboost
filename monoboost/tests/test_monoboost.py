@@ -4,199 +4,129 @@ import numpy as np
 import numpy.testing as npt
 import monoboost as mb
 from sklearn.datasets import load_boston
-
-
+import time
+from sklearn.metrics import  confusion_matrix
 def load_data_set():
     # Load data
-    max_N = 200
+
     data = load_boston()
     y = data['target']
     X = data['data']
     features = data['feature_names']
-    multi_class = False
     # Specify monotone features
-    incr_feat_names = ['RM', 'RAD']
-    decr_feat_names = ['CRIM', 'DIS', 'LSTAT']
+    incr_feat_names = ['RM']#['RM', 'RAD']
+    decr_feat_names = ['CRIM', 'LSTAT'] # ['CRIM', 'DIS', 'LSTAT']
     # get 1 based indices of incr and decr feats
     incr_feats = [i + 1 for i in np.arange(len(features)) if
                   features[i] in incr_feat_names]
     decr_feats = [i + 1 for i in np.arange(len(features)) if
                   features[i] in decr_feat_names]
     # Convert to classification problem
-    if multi_class:
-        y_class = y.copy()
-        thresh1 = 15
-        thresh2 = 21
-        thresh3 = 27
-        y_class[y > thresh3] = 3
-        y_class[np.logical_and(y > thresh2, y <= thresh3)] = 2
-        y_class[np.logical_and(y > thresh1, y <= thresh2)] = 1
-        y_class[y <= thresh1] = 0
-    else:  # binary
-        y_class = y.copy()
-        thresh = 21  # middle=21
-        y_class[y_class < thresh] = -1
-        y_class[y_class >= thresh] = +1
-    return X[0:max_N, :], y_class[0:max_N], incr_feats, decr_feats
+    # Multi-class
+    y_multiclass = y.copy()
+    thresh1 = 15
+    thresh2 = 21
+    thresh3 = 27
+    y_multiclass[y > thresh3] = 3
+    y_multiclass[np.logical_and(y > thresh2, y <= thresh3)] = 2
+    y_multiclass[np.logical_and(y > thresh1, y <= thresh2)] = 1
+    y_multiclass[y <= thresh1] = 0
+    # Binary
+    y_binary = y.copy()
+    thresh = 21  # middle=21
+    y_binary[y_binary < thresh] = -1
+    y_binary[y_binary >= thresh] = +1
+    return X, y_binary, y_multiclass, incr_feats, decr_feats
 
 
 # Load data
-X, y, incr_feats, decr_feats = load_data_set()
+max_N = 200#200
+np.random.seed(13) # comment out for changing random training set
+X, y_binary, y_multiclass, incr_feats, decr_feats = load_data_set()
+indx_train=np.random.permutation(np.arange(X.shape[0]))[0:max_N]
+inx_test=np.asarray([i for i in np.arange(max_N) if i not in indx_train ])
+X_train=X[indx_train,:]
+X_test=X[inx_test,:]
+
+
+y_train=dict()
+y_test=dict()
+n_classes=dict()
+y_train['binary']=y_binary[indx_train]
+y_train['multiclass']=y_multiclass[indx_train]
+y_test['binary']=y_binary[inx_test]
+y_test['multiclass']=y_multiclass[inx_test]
+n_classes['binary']=2
+n_classes['multiclass']=4
 
 
 def test_model_fit():
     # Specify hyperparams for model solution
     vs = [0.01, 0.1, 0.2, 0.5, 1]
     etas = [0.06, 0.125, 0.25, 0.5, 1]
-    eta = etas[2]
+    eta =  etas[2]
     learner_type = 'two-sided'
-    max_iters = 3
-    # Solve model
-    mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
-                          decr_feats=decr_feats, num_estimators=max_iters,
-                          fit_algo='L2-one-class', eta=eta, vs=vs,
-                          verbose=False, learner_type=learner_type)
-    mb_clf.fit(X, y)
-    # Assess fit
-    y_pred = mb_clf.predict(X)
-    acc = np.sum(y == y_pred) / len(y)
-    npt.assert_almost_equal(acc, 0.70999999999)
-
+    max_iters = 5
+    # store benchmark
+    acc_benchmark={'multiclass': 0.64000000000000001, 'binary': 0.784}
+    for response in ['binary']:#'multiclass','binary']:#,'multiclass']:
+        y_train_=y_train[response]
+        y_test_=y_test[response]
+        # Solve model
+        mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
+                              decr_feats=decr_feats, num_estimators=max_iters,
+                              fit_algo='L2-one-class', eta=eta, vs=vs,
+                              verbose=False, learner_type=learner_type)
+        mb_clf.fit(X_train, y_train_)
+        # Assess fit
+        y_pred = mb_clf.predict(X_test)
+        cm=confusion_matrix(y_test_,y_pred)
+        acc = np.sum(y_test_ == y_pred) / len(y_test_)
+        print(acc)
+        #npt.assert_almost_equal(acc, 0.70999999999)
+        return mb_clf
 
 def test_ensemble_model_fit():
     # Specify hyperparams for model solution
     vs = [0.01, 0.1, 0.2, 0.5, 1]
     etas = [0.06, 0.125, 0.25, 0.5, 1]
-    eta = etas[2]
-    learner_type = 'one-sided'
-    num_estimators = 6
-    learner_num_estimators = 2
-    learner_eta = 0.5
-    learner_v_mode = 'random'
-    sample_fract = 0.5
+    eta = 0.5#etas[2]
+    learner_type = 'two-sided'
+    num_estimators = 20
+    learner_num_estimators = 5
+    learner_eta = 1#0.5#1.0 #0.5 # needs to be higher to get useful cones on each monoboost iteration, otherwise (for eta<1) keeps repeating the same cones to reduce the RMSE base monoboost.
+    learner_v_mode = 'all'#'random'
+    sample_fract = 0.6
     random_state = 1
-    standardise = True
-    # Solve model
-    mb_clf = mb.MonoBoostEnsemble(
-        n_feats=X.shape[1],
-        incr_feats=incr_feats,
-        decr_feats=decr_feats,
-        num_estimators=num_estimators,
-        fit_algo='L2-one-class',
-        eta=eta,
-        vs=vs,
-        verbose=False,
-        learner_type=learner_type,
-        learner_num_estimators=learner_num_estimators,
-        learner_eta=learner_eta,
-        learner_v_mode=learner_v_mode,
-        sample_fract=sample_fract,
-        random_state=random_state,
-        standardise=standardise)
-    mb_clf.fit(X, y)
-    # Assess fit
-    y_pred = mb_clf.predict(X)
-    acc = np.sum(y == y_pred) / len(y)
-    npt.assert_almost_equal(acc, 0.6949999999)
+    standardise = False
+    for response in ['multiclass']:#,'multiclass']: binary
+        y_train_=y_train[response]
+        y_test_=y_test[response]
+        # Solve model
+        mb_clf = mb.MonoBoostEnsemble(
+            n_feats=X.shape[1],
+            incr_feats=incr_feats,
+            decr_feats=decr_feats,
+            num_estimators=num_estimators,
+            fit_algo='L2-one-class',
+            eta=eta,
+            vs=vs,
+            verbose=False,
+            learner_type=learner_type,
+            learner_num_estimators=learner_num_estimators,
+            learner_eta=learner_eta,
+            learner_v_mode=learner_v_mode,
+            sample_fract=sample_fract,
+            random_state=random_state,
+            standardise=standardise)
+        mb_clf.fit(X_train, y_train_)
+        # Assess fit
+        y_pred = mb_clf.predict(X_test)
+        cm=confusion_matrix(y_test_,y_pred)
+        acc = np.sum(y_test_ == y_pred) / len(y_test_)
+        print(acc)
+        return mb_clf
+        #npt.assert_almost_equal(acc, 0.6959999999)
 
-# test_ensemble_model_fit()
-# def test_transform_data():
-#    """
-#    Testing the transformation of the data from raw data to functions
-#    used for fitting a function.
-#
-#    """
-#    # We start with actual data. We test here just that reading the data in
-#    # different ways ultimately generates the same arrays.
-#    from matplotlib import mlab
-#    ortho = mlab.csv2rec(op.join(data_path, 'ortho.csv'))
-#    x1, y1, n1 = sb.transform_data(ortho)
-#    x2, y2, n2 = sb.transform_data(op.join(data_path, 'ortho.csv'))
-#    npt.assert_equal(x1, x2)
-#    npt.assert_equal(y1, y2)
-#    # We can also be a bit more critical, by testing with data that we
-#    # generate, and should produce a particular answer:
-#    my_data = pd.DataFrame(
-#        np.array([[0.1, 2], [0.1, 1], [0.2, 2], [0.2, 2], [0.3, 1],
-#                  [0.3, 1]]),
-#        columns=['contrast1', 'answer'])
-#    my_x, my_y, my_n = sb.transform_data(my_data)
-#    npt.assert_equal(my_x, np.array([0.1, 0.2, 0.3]))
-#    npt.assert_equal(my_y, np.array([0.5, 0, 1.0]))
-#    npt.assert_equal(my_n, np.array([2, 2, 2]))
-#
-#
-# def test_cum_gauss():
-#    sigma = 1
-#    mu = 0
-#    x = np.linspace(-1, 1, 12)
-#    y = sb.cumgauss(x, mu, sigma)
-#    # A basic test that the input and output have the same shape:
-#    npt.assert_equal(y.shape, x.shape)
-#    # The function evaluated over items symmetrical about mu should be
-#    # symmetrical relative to 0 and 1:
-#    npt.assert_equal(y[0], 1 - y[-1])
-#    # Approximately 68% of the Gaussian distribution is in mu +/- sigma, so
-#    # the value of the cumulative Gaussian at mu - sigma should be
-#    # approximately equal to (1 - 0.68/2). Note the low precision!
-#    npt.assert_almost_equal(y[0], (1 - 0.68) / 2, decimal=2)
-#
-#
-# def test_opt_err_func():
-#    # We define a truly silly function, that returns its input, regardless of
-#    # the params:
-#    def my_silly_func(x, my_first_silly_param, my_other_silly_param):
-#        return x
-#
-#    # The silly function takes two parameters and ignores them
-#    my_params = [1, 10]
-#    my_x = np.linspace(-1, 1, 12)
-#    my_y = my_x
-#    my_err = sb.opt_err_func(my_params, my_x, my_y, my_silly_func)
-#    # Since x and y are equal, the error is zero:
-#    npt.assert_equal(my_err, np.zeros(my_x.shape[0]))
-#
-#    # Let's consider a slightly less silly function, that implements a linear
-#    # relationship between inputs and outputs:
-#    def not_so_silly_func(x, a, b):
-#        return x * a + b
-#
-#    my_params = [1, 10]
-#    my_x = np.linspace(-1, 1, 12)
-#    # To test this, we calculate the relationship explicitely:
-#    my_y = my_x * my_params[0] + my_params[1]
-#    my_err = sb.opt_err_func(my_params, my_x, my_y, not_so_silly_func)
-#    # Since x and y are equal, the error is zero:
-#    npt.assert_equal(my_err, np.zeros(my_x.shape[0]))
-#
-#
-# def test_Model():
-#    """ """
-#    M = sb.Model()
-#    x = np.linspace(0.1, 0.9, 22)
-#    target_mu = 0.5
-#    target_sigma = 1
-#    target_y = sb.cumgauss(x, target_mu, target_sigma)
-#    F = M.fit(x, target_y, initial=[target_mu, target_sigma])
-#    npt.assert_equal(F.predict(x), target_y)
-#
-#
-# def test_params_regression():
-#    """
-#    Test for regressions in model parameter values from provided data
-#    """
-#
-#    model = sb.Model()
-#    ortho_x, ortho_y, ortho_n = sb.transform_data(op.join(data_path,
-#                                                          'ortho.csv'))
-#
-#    para_x, para_y, para_n = sb.transform_data(op.join(data_path,
-#                                                       'para.csv'))
-#
-#    ortho_fit = model.fit(ortho_x, ortho_y)
-#    para_fit = model.fit(para_x, para_y)
-#
-#    npt.assert_almost_equal(ortho_fit.params[0], 0.46438638)
-#    npt.assert_almost_equal(ortho_fit.params[1], 0.13845926)
-#    npt.assert_almost_equal(para_fit.params[0], 0.57456788)
-#    npt.assert_almost_equal(para_fit.params[1], 0.13684096)
+mbe_clf=test_ensemble_model_fit()
+#mb_clf=test_model_fit()

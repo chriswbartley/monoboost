@@ -20,39 +20,33 @@ __version__ = '.'.join(map(str, _ver))
 CLASSIFIERS = ["Development Status :: 3 - Alpha",
                "Environment :: Console",
                "Intended Audience :: Science/Research",
-               "License :: OSI Approved :: MIT License",
+               "License :: BSD 3 Clause License",
                "Operating System :: OS Independent",
                "Programming Language :: Python",
                "Topic :: Scientific/Engineering"]
 
 # Description should be a one-liner:
-description = "monoboost: a partially monotone instance based classification library"
+description = "monoboost: a monotone instance based classification library"
 # Long description will go up on the pypi page
 long_description = """
 
 Monoboost
 ========
-Monoboost is a template project for small scientific Python projects.
+Monoboost is a Python library for partially monotone classification.
 
-It contains software implementations of an analysis of some simple data, but
-more importantly, it contains infrastructure for testing, documentation,
-continuous integration and deployment, which can be easily adapted
-to use in other projects.
-
-To get started using these components in your own software, please go to the
-repository README_.
+To get started, please go to the repository README_.
 
 .. _README: https://github.com/chriswbartley/monoboost/blob/master/README.md
 
 License
 =======
-``monoboost`` is licensed under the terms of the MIT license. See the file
-"LICENSE" for information on the history of this software, terms & conditions
-for usage, and a DISCLAIMER OF ALL WARRANTIES.
+``monoboost`` is licensed under the terms of the BSD 3 Clause License. See the
+file "LICENSE" for information on the history of this software, terms &
+conditions for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (c) 2017--, Christopher Bartley, The University of Western Australia.
+Copyright (c) 2017, Christopher Bartley
 """
 
 NAME = "MonoBoost"
@@ -62,7 +56,7 @@ DESCRIPTION = description
 LONG_DESCRIPTION = long_description
 URL = "http://github.com/chriswbartley/monoboost"
 DOWNLOAD_URL = ""
-LICENSE = "MIT"
+LICENSE = "BSD 3 Clause"
 AUTHOR = "Christopher Bartley"
 AUTHOR_EMAIL = "christopher.bartley@research.uwa.edu.au"
 PLATFORMS = "OS Independent"

@@ -1,4 +1,4 @@
-Monoboost Examples
+MonoBoost Examples
 ================
 
-Click its corresponding example.
+Click an example.

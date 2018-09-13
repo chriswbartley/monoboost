@@ -136,14 +136,7 @@ class MonoComparator():
         else:  # incomparable due to nmt features
             return -99
 
-def calc_loss_deviance(curr_ttls,y):
-    
-    p_ = np.exp(curr_ttls) / \
-        (np.exp(curr_ttls) + np.exp(-curr_ttls))
-    lidstone=0.01
-    p_=(p_*len(y)+lidstone)/(len(y)+2*lidstone) # protect against perfect probabilities causing instability
-    loss_=-np.sum(y*np.log(p_))-np.sum((1-y)*np.log(1-p_) )
-    return loss_
+
 class MonoLearner():
     def __init__(
             self,
@@ -253,89 +246,6 @@ class MonoLearner():
 #                comp == 0 or comp == self.dirn) else self.coefs[0]
 #        return [y_pred, is_comp]
 
-
-    def calc_coefs(self,comp_pts,hp,res_train,y,curr_ttls):
-        incomp_pts = np.asarray(np.setdiff1d(
-        np.arange(len(y)), comp_pts))
-        res_comp_pts = res_train[comp_pts]
-        res_incomp_pts = res_train[incomp_pts]
-        mean_res_in = np.mean(res_comp_pts)
-        mean_res_out = np.mean(res_incomp_pts)
-
-        if self.loss == 'deviance':
-            
-            sum_res_comp = np.sum(np.abs(res_comp_pts) * (
-                1 - np.abs(res_comp_pts)))
-            sum_res_incomp = np.sum(np.abs(res_incomp_pts) * (
-                1 - np.abs(res_incomp_pts)))
-            signed_sum_res_comp = np.sum(res_comp_pts)
-            signed_sum_res_incomp = np.sum(res_incomp_pts)
-            if (sum_res_comp > 1e-9 and
-                    sum_res_incomp > 1e-9 and
-                    np.abs(signed_sum_res_comp) > 1e-9 and
-                    np.abs(signed_sum_res_incomp) > 1e-9):
-                coef_in = 0.5 * signed_sum_res_comp / \
-                    (sum_res_comp)
-                coef_out = 0.5 * signed_sum_res_incomp / \
-                    (sum_res_incomp)
-                ratio = np.max(
-                    [np.abs(coef_in / coef_out),
-                     np.abs(coef_out / coef_in)])
-                
-            else:
-                coef_in = 0
-                coef_out = 0
-                ratio = 0.
-
-
-        elif self.loss == 'rmse':
-            #use_M-regression (huber loss)
-            use_huber=True
-            if use_huber:
-                q_alpha=0.5
-                q_in=np.percentile(np.abs(y[comp_pts] - curr_totals[comp_pts]),q_alpha)
-                res_in=y[comp_pts] - curr_totals[comp_pts]
-                median_in=np.median(res_in)
-                coef_in = median_in + (
-                            1/len(comp_pts)*(np.sum(np.sign(res_in-
-                                 median_in)*np.min(np.hstack([q_in*np.ones(len(res_in)).reshape([-1,1]),np.abs(res_in-
-                                 median_in).reshape([-1,1])]),axis=1))))
-
-   
-                if self.learner_type_code == 1:
-                    coef_out=0
-                else:
-                    q_out=np.percentile(np.abs(y[incomp_pts] - curr_totals[incomp_pts]),q_alpha)
-                    res_out=y[incomp_pts] - curr_totals[incomp_pts]
-                    median_out=np.median(res_out) 
-                    coef_out = median_out + (
-                            1/len(incomp_pts)*(np.sum(np.sign(res_out-
-                                 median_out)*np.min(np.hstack([q_out*np.ones(len(res_out)).reshape([-1,1]),np.abs(res_out-
-                                 median_out).reshape([-1,1])]),axis=1))))
-            else:
-                coef_in = np.median(
-                    y[comp_pts] - curr_totals[comp_pts])                                
-                coef_out = (0 if self.learner_type_code == 1 else
-                        np.median(y[incomp_pts] -
-                                  curr_totals[incomp_pts])) 
-
-
-        # calc loss
-        new_preds=curr_ttls.copy()
-        new_preds[comp_pts]+=coef_in
-        new_preds[incomp_pts]+=coef_out
-        loss_=self.calc_loss(new_preds,y)
-        
-        # one-sided check
-        if self.learner_type_code == 1: 
-            coef_out=0.
-            
-        return [coef_out,coef_in,ratio,loss_]
-    def calc_loss(self,curr_ttls,y):
-        if self.loss=='deviance':
-            return calc_loss_deviance(curr_ttls,y)
-        else:
-            return calc_loss_rmse(curr_ttls,y)
     def fit_from_cache(
             self,
             cached_local_hp_data,
@@ -345,8 +255,7 @@ class MonoLearner():
             curr_totals,
             hp_reg=None,
             hp_reg_c=None):
-        curr_loss=self.calc_loss(curr_totals,y)
-        best = [curr_loss, -1, -99, -1, [-1, -1]]    # err, base, dirn, hp, coefs
+        best = [1e99, -1, -99, -1, [-1, -1]]    # err, base, dirn, hp, coefs
         for i in np.arange(X.shape[0]):
             data_i = cached_local_hp_data[i]
             for dirn in [-1, +1]:
@@ -359,90 +268,88 @@ class MonoLearner():
                     incomp_pts = np.asarray(np.setdiff1d(
                         np.arange(X.shape[0]), comp_pts))
                     hp = hps[i_v, :]
-#                    res_comp_pts = res_train[comp_pts]
-#                    res_incomp_pts = res_train[incomp_pts]
-#                    mean_res_in = np.mean(res_comp_pts)
-#                    mean_res_out = np.mean(res_incomp_pts)
-#                    sse = np.sum((res_train[comp_pts] - mean_res_in)**2) + \
-#                        np.sum((res_train[incomp_pts] - mean_res_out)**2)
-#                    if hp_reg is not None and len(self.nmt_feats) > 0:
-#                        if hp_reg == 'L1_nmt' or hp_reg == 'L2_nmt':
-#                            sse = sse + hp_reg_c * \
-#                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1
-#                                               if hp_reg == 'L1_nmt' else
-#                                               2)**(1 if hp_reg == 'L1_nmt'
-#                                                    else 2)
-#                        elif hp_reg == 'L1' or hp_reg == 'L2':
-#                            sse = sse + hp_reg_c * \
-#                                np.linalg.norm(hp, ord=1 if hp_reg == 'L1' else
-#                                               2)**(1 if hp_reg == 'L1' else 2)
-#                    if sse <= best[0] and len(
-#                            comp_pts) > 0:
-#                        if self.loss == 'deviance':
-#                            
-#                            sum_res_comp = np.sum(np.abs(res_comp_pts) * (
-#                                1 - np.abs(res_comp_pts)))
-#                            sum_res_incomp = np.sum(np.abs(res_incomp_pts) * (
-#                                1 - np.abs(res_incomp_pts)))
-#                            signed_sum_res_comp = np.sum(res_comp_pts)
-#                            signed_sum_res_incomp = np.sum(res_incomp_pts)
-#                            if (sum_res_comp > 1e-9 and
-#                                    sum_res_incomp > 1e-9 and
-#                                    np.abs(signed_sum_res_comp) > 1e-9 and
-#                                    np.abs(signed_sum_res_incomp) > 1e-9):
-#                                coef_in = 0.5 * signed_sum_res_comp / \
-#                                    (sum_res_comp)
-#                                if self.learner_type_code == 0:  # two sided
-#                                    coef_out = 0.5 * signed_sum_res_incomp / \
-#                                        (sum_res_incomp)
-#                                    ratio = np.max(
-#                                        [np.abs(coef_in / coef_out),
-#                                         np.abs(coef_out / coef_in)])
-#                                elif self.learner_type_code == 1:  # one-sided
-#                                    [coef_out, ratio] = [0., 0.5]
-#                            else:
-#                                coef_in = 0
-#                                coef_out = 0
-#                                ratio = 0.
-#                        elif self.loss == 'rmse':
-#                            #use_M-regression (huber loss)
-#                            use_huber=True
-#                            if use_huber:
-#                                q_alpha=0.5
-#                                q_in=np.percentile(np.abs(y[comp_pts] - curr_totals[comp_pts]),q_alpha)
-#                                res_in=y[comp_pts] - curr_totals[comp_pts]
-#                                median_in=np.median(res_in)
-#                                coef_in = median_in + (
-#                                            1/len(comp_pts)*(np.sum(np.sign(res_in-
-#                                                 median_in)*np.min(np.hstack([q_in*np.ones(len(res_in)).reshape([-1,1]),np.abs(res_in-
-#                                                 median_in).reshape([-1,1])]),axis=1))))
-#        
-#           
-#                                if self.learner_type_code == 1:
-#                                    coef_out=0
-#                                else:
-#                                    q_out=np.percentile(np.abs(y[incomp_pts] - curr_totals[incomp_pts]),q_alpha)
-#                                    res_out=y[incomp_pts] - curr_totals[incomp_pts]
-#                                    median_out=np.median(res_out) 
-#                                    coef_out = median_out + (
-#                                            1/len(incomp_pts)*(np.sum(np.sign(res_out-
-#                                                 median_out)*np.min(np.hstack([q_out*np.ones(len(res_out)).reshape([-1,1]),np.abs(res_out-
-#                                                 median_out).reshape([-1,1])]),axis=1))))
-#                            else:
-#                                coef_in = np.median(
-#                                    y[comp_pts] - curr_totals[comp_pts])                                
-#                                coef_out = (0 if self.learner_type_code == 1 else
-#                                        np.median(y[incomp_pts] -
-#                                                  curr_totals[incomp_pts])) 
-#                            ratio = 0.
-                    [coef_out,coef_in,ratio,loss_]=self.calc_coefs(comp_pts,hp,res_train,y,curr_totals)
-                    if loss_<=best[0]: 
+                    res_comp_pts = res_train[comp_pts]
+                    res_incomp_pts = res_train[incomp_pts]
+                    mean_res_in = np.mean(res_comp_pts)
+                    mean_res_out = np.mean(res_incomp_pts)
+                    sse = np.sum((res_train[comp_pts] - mean_res_in)**2) + \
+                        np.sum((res_train[incomp_pts] - mean_res_out)**2)
+                    if hp_reg is not None and len(self.nmt_feats) > 0:
+                        if hp_reg == 'L1_nmt' or hp_reg == 'L2_nmt':
+                            sse = sse + hp_reg_c * \
+                                np.linalg.norm(hp[self.nmt_feats - 1], ord=1
+                                               if hp_reg == 'L1_nmt' else
+                                               2)**(1 if hp_reg == 'L1_nmt'
+                                                    else 2)
+                        elif hp_reg == 'L1' or hp_reg == 'L2':
+                            sse = sse + hp_reg_c * \
+                                np.linalg.norm(hp, ord=1 if hp_reg == 'L1' else
+                                               2)**(1 if hp_reg == 'L1' else 2)
+                    if sse <= best[0] and len(
+                            comp_pts) > 0:
+                        if self.loss == 'deviance':
+                            
+                            sum_res_comp = np.sum(np.abs(res_comp_pts) * (
+                                1 - np.abs(res_comp_pts)))
+                            sum_res_incomp = np.sum(np.abs(res_incomp_pts) * (
+                                1 - np.abs(res_incomp_pts)))
+                            signed_sum_res_comp = np.sum(res_comp_pts)
+                            signed_sum_res_incomp = np.sum(res_incomp_pts)
+                            if (sum_res_comp > 1e-9 and
+                                    sum_res_incomp > 1e-9 and
+                                    np.abs(signed_sum_res_comp) > 1e-9 and
+                                    np.abs(signed_sum_res_incomp) > 1e-9):
+                                coef_in = 0.5 * signed_sum_res_comp / \
+                                    (sum_res_comp)
+                                if self.learner_type_code == 0:  # two sided
+                                    coef_out = 0.5 * signed_sum_res_incomp / \
+                                        (sum_res_incomp)
+                                    ratio = np.max(
+                                        [np.abs(coef_in / coef_out),
+                                         np.abs(coef_out / coef_in)])
+                                elif self.learner_type_code == 1:  # one-sided
+                                    [coef_out, ratio] = [0., 0.5]
+                            else:
+                                coef_in = 0
+                                coef_out = 0
+                                ratio = 0.
+                        elif self.loss == 'rmse':
+                            #use_M-regression (huber loss)
+                            use_huber=True
+                            if use_huber:
+                                q_alpha=0.5
+                                q_in=np.percentile(np.abs(y[comp_pts] - curr_totals[comp_pts]),q_alpha)
+                                res_in=y[comp_pts] - curr_totals[comp_pts]
+                                median_in=np.median(res_in)
+                                coef_in = median_in + (
+                                            1/len(comp_pts)*(np.sum(np.sign(res_in-
+                                                 median_in)*np.min(np.hstack([q_in*np.ones(len(res_in)).reshape([-1,1]),np.abs(res_in-
+                                                 median_in).reshape([-1,1])]),axis=1))))
+        
+           
+                                if self.learner_type_code == 1:
+                                    coef_out=0
+                                else:
+                                    q_out=np.percentile(np.abs(y[incomp_pts] - curr_totals[incomp_pts]),q_alpha)
+                                    res_out=y[incomp_pts] - curr_totals[incomp_pts]
+                                    median_out=np.median(res_out) 
+                                    coef_out = median_out + (
+                                            1/len(incomp_pts)*(np.sum(np.sign(res_out-
+                                                 median_out)*np.min(np.hstack([q_out*np.ones(len(res_out)).reshape([-1,1]),np.abs(res_out-
+                                                 median_out).reshape([-1,1])]),axis=1))))
+                            else:
+                                coef_in = np.median(
+                                    y[comp_pts] - curr_totals[comp_pts])                                
+                                coef_out = (0 if self.learner_type_code == 1 else
+                                        np.median(y[incomp_pts] -
+                                                  curr_totals[incomp_pts])) 
+                            ratio = 0.
                         #if np.sign(coef_in) == dirn and np.sign(coef_out) == -dirn (
                         if coef_in*dirn > coef_out * dirn and (
                                 coef_in != np.inf and coef_out != np.inf and
                                 ratio < 1e9):
                             best = [
-                                loss_, i, dirn, hp, [
+                                sse, i, dirn, hp, [
                                     coef_out, coef_in]]
         self.x_base = X[best[1], :]
         self.coefs = best[4]
@@ -1065,14 +972,12 @@ class MonoBoost():
                 X_coef_contribs[:,dirn_rule_mask]=X_coef_contribs[:,dirn_rule_mask]+self.eta*__estimators_coefs__[k][dirn_rule_mask,1]*X_rule_transform_
                 X_coef_contribs[:,dirn_rule_mask]=X_coef_contribs[:,dirn_rule_mask]+self.eta*__estimators_coefs__[k][dirn_rule_mask,0]*np.abs(X_rule_transform_-1)
             if cum:
-                n_est=self.num_estimators #len(self.estimators[k])
-                dec_fn[k] = np.zeros([X_pred.shape[0], n_est])+self.intercept_[k]
-                num_comp[k]= np.zeros([X_pred.shape[0], n_est])
+                dec_fn[k] = np.zeros([X_pred.shape[0], len(self.estimators)])+self.intercept_
+                num_comp[k]= np.zeros([X_pred.shape[0], len(self.estimators)])
                 
-                for j in np.arange(n_est):
-                    for jj in np.arange(j,n_est):
-                        dec_fn[k][:,jj]=dec_fn[k][:,jj]+X_coef_contribs[:,j]
-                        num_comp[k][:,jj]=num_comp[k][:,jj]+X_rule_transform[:,j]
+                for j in np.arange(len(self.estimators)):
+                    dec_fn[k][:,k:]=dec_fn[k][:,j:]+X_coef_contribs[:,j]
+                    num_comp[k][:,k:]=num_comp[k][:,j:]+X_rule_transform[:,j]
             else:
                 dec_fn[k]=np.sum(X_coef_contribs,axis=1)+self.intercept_[k]
                 num_comp[k]=np.sum(X_rule_transform,axis=1)
@@ -1091,10 +996,7 @@ class MonoBoost():
 #            
 #                
 #        else:
-        if cum:
-            predictions=np.zeros([dec[0].shape[0],self.num_estimators],dtype=np.int32)
-        else:
-            predictions=np.zeros(X_pred.shape[0],dtype=np.int32)
+        predictions=np.zeros(X_pred.shape[0],dtype=np.int32)
         if self.loss_=='deviance':
             for k in self.ks:
                 predictions += dec[k]>=0 
@@ -1325,7 +1227,7 @@ class MonoBoostEnsemble():
                 np.random.randint(1e4),
                 standardise=False,
                 classes=[-1,1],
-                loss='deviance')
+                loss='rmse')
             if self.sample_fract < 1:
                 sample_indx = np.random.permutation(np.arange(X.shape[0]))[
                     0:int(np.floor(self.sample_fract * X.shape[0]))]
