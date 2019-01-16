@@ -22,6 +22,8 @@ from numpy.distutils.command import build_src
 
 # a bit of monkeypatching ...
 import Cython.Compiler.Main
+import Cython.Compiler.Options
+Cython.Compiler.Options.annotate = True
 build_src.Pyrex = Cython
 build_src.have_pyrex = True
 
@@ -69,7 +71,7 @@ build_src.build_src.generate_a_pyrex_source = generate_a_pyrex_source
 
 def configuration(parent_package="", top_path=None):
     config = Configuration("monoboost", parent_package, top_path)
-    config.add_extension("monoboost._monoboost",
+    config.add_extension("_monoboost",
                          sources=["_monoboost.pyx"],
                          include_dirs=[numpy.get_include()],
                          extra_compile_args = ["-ffast-math"])

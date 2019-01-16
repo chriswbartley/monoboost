@@ -31,11 +31,13 @@ def load_data_set():
     y_multiclass[np.logical_and(y > thresh2, y <= thresh3)] = 2
     y_multiclass[np.logical_and(y > thresh1, y <= thresh2)] = 1
     y_multiclass[y <= thresh1] = 0
+    y_multiclass =np.asarray(y_multiclass ,dtype=np.int32)
     # Binary
     y_binary = y.copy()
     thresh = 21  # middle=21
     y_binary[y_binary < thresh] = -1
     y_binary[y_binary >= thresh] = +1
+    y_binary =np.asarray(y_binary ,dtype=np.int32)
     return X, y_binary, y_multiclass, incr_feats, decr_feats
 
 
@@ -66,7 +68,8 @@ def test_model_fit():
     etas = [0.06, 0.125, 0.25, 0.5, 1]
     eta =  etas[2]
     learner_type = 'two-sided'
-    max_iters = 5
+    max_iters = 100
+    fit_algo='none'#'L2-one-class' none
     # store benchmark
     acc_benchmark={'multiclass': 0.64000000000000001, 'binary': 0.784}
     for response in ['binary']:#'multiclass','binary']:#,'multiclass']:
@@ -75,7 +78,7 @@ def test_model_fit():
         # Solve model
         mb_clf = mb.MonoBoost(n_feats=X.shape[1], incr_feats=incr_feats,
                               decr_feats=decr_feats, num_estimators=max_iters,
-                              fit_algo='L2-one-class', eta=eta, vs=vs,
+                              fit_algo=fit_algo, eta=eta, vs=vs,
                               verbose=False, learner_type=learner_type)
         mb_clf.fit(X_train, y_train_)
         # Assess fit
@@ -86,47 +89,47 @@ def test_model_fit():
         #npt.assert_almost_equal(acc, 0.70999999999)
         return mb_clf
 
-def test_ensemble_model_fit():
-    # Specify hyperparams for model solution
-    vs = [0.01, 0.1, 0.2, 0.5, 1]
-    etas = [0.06, 0.125, 0.25, 0.5, 1]
-    eta = 0.5#etas[2]
-    learner_type = 'two-sided'
-    num_estimators = 20
-    learner_num_estimators = 5
-    learner_eta = 1#0.5#1.0 #0.5 # needs to be higher to get useful cones on each monoboost iteration, otherwise (for eta<1) keeps repeating the same cones to reduce the RMSE base monoboost.
-    learner_v_mode = 'all'#'random'
-    sample_fract = 0.6
-    random_state = 1
-    standardise = False
-    for response in ['multiclass']:#,'multiclass']: binary
-        y_train_=y_train[response]
-        y_test_=y_test[response]
-        # Solve model
-        mb_clf = mb.MonoBoostEnsemble(
-            n_feats=X.shape[1],
-            incr_feats=incr_feats,
-            decr_feats=decr_feats,
-            num_estimators=num_estimators,
-            fit_algo='L2-one-class',
-            eta=eta,
-            vs=vs,
-            verbose=False,
-            learner_type=learner_type,
-            learner_num_estimators=learner_num_estimators,
-            learner_eta=learner_eta,
-            learner_v_mode=learner_v_mode,
-            sample_fract=sample_fract,
-            random_state=random_state,
-            standardise=standardise)
-        mb_clf.fit(X_train, y_train_)
-        # Assess fit
-        y_pred = mb_clf.predict(X_test)
-        cm=confusion_matrix(y_test_,y_pred)
-        acc = np.sum(y_test_ == y_pred) / len(y_test_)
-        print(acc)
-        return mb_clf
-        #npt.assert_almost_equal(acc, 0.6959999999)
+#def test_ensemble_model_fit():
+#    # Specify hyperparams for model solution
+#    vs = [0.01, 0.1, 0.2, 0.5, 1]
+#    etas = [0.06, 0.125, 0.25, 0.5, 1]
+#    eta = 0.5#etas[2]
+#    learner_type = 'two-sided'
+#    num_estimators = 20
+#    learner_num_estimators = 5
+#    learner_eta = 1#0.5#1.0 #0.5 # needs to be higher to get useful cones on each monoboost iteration, otherwise (for eta<1) keeps repeating the same cones to reduce the RMSE base monoboost.
+#    learner_v_mode = 'all'#'random'
+#    sample_fract = 0.6
+#    random_state = 1
+#    standardise = False
+#    for response in ['multiclass']:#,'multiclass']: binary
+#        y_train_=y_train[response]
+#        y_test_=y_test[response]
+#        # Solve model
+#        mb_clf = mb.MonoBoostEnsemble(
+#            n_feats=X.shape[1],
+#            incr_feats=incr_feats,
+#            decr_feats=decr_feats,
+#            num_estimators=num_estimators,
+#            fit_algo='L2-one-class',
+#            eta=eta,
+#            vs=vs,
+#            verbose=False,
+#            learner_type=learner_type,
+#            learner_num_estimators=learner_num_estimators,
+#            learner_eta=learner_eta,
+#            learner_v_mode=learner_v_mode,
+#            sample_fract=sample_fract,
+#            random_state=random_state,
+#            standardise=standardise)
+#        mb_clf.fit(X_train, y_train_)
+#        # Assess fit
+#        y_pred = mb_clf.predict(X_test)
+#        cm=confusion_matrix(y_test_,y_pred)
+#        acc = np.sum(y_test_ == y_pred) / len(y_test_)
+#        print(acc)
+#        return mb_clf
+#        #npt.assert_almost_equal(acc, 0.6959999999)
 
-mbe_clf=test_ensemble_model_fit()
-#mb_clf=test_model_fit()
+#mbe_clf=test_ensemble_model_fit()
+mb_clf=test_model_fit()

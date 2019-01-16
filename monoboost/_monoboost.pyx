@@ -40,7 +40,7 @@ from numpy import ones as np_ones
 from numpy import bool as np_bool
 from numpy import float32 as np_float32
 from numpy import float64 as np_float64
-
+from libc.math cimport log, exp
 
 # constant to mark tree leafs
 cdef SIZE_t TREE_LEAF = -1
@@ -115,4 +115,136 @@ def apply_rules_c(np.ndarray[float64, ndim=2] X,
                  rule_corners_MT.shape[0],
                  <int32*> (<np.ndarray> out).data)
 
+@cython.boundscheck(False)
+cdef void _get_signed_sums_c(int32 *comp_pts,
+                             int32 len_comp_pts,
+                             int32 *out_comp_pts_arr,
+                           float64 *res_train,
+                           int32 len_res_train,
+                           float64 *out_sums,
+                           ):
+    cdef int32 i=0
+    for i in range(len_comp_pts):
+        out_comp_pts_arr[comp_pts[i]]=1
+    
+    for i in range(len_res_train):
+        if out_comp_pts_arr[i]==1: #comparable
+            out_sums[0]=out_sums[0]+abs(res_train[i])*(1-abs(res_train[i]))
+            out_sums[1]=out_sums[1]+res_train[i]
+        else: # incomparable
+            out_sums[2]=out_sums[2]+abs(res_train[i])*(1-abs(res_train[i]))
+            out_sums[3]=out_sums[3]+res_train[i]
+    return 
 
+def get_signed_sums_c(object comp_pts,object res_train):
+    cdef float64 sum_res_comp=0.
+    cdef float64 sum_res_incomp=0.
+    cdef float64 signed_sum_res_comp=0.
+    cdef float64 signed_sum_res_incomp=0.
+    out_sums=np.zeros(4,dtype=np.float64)
+    len_comp_pts=len(comp_pts)
+    len_res_train=len(res_train)
+    out_comp_pts_arr=np.zeros(len(res_train),dtype=np.int32)
+    _get_signed_sums_c(<int32*> (<np.ndarray> comp_pts).data  ,
+                             len_comp_pts,
+                             <int32*> (<np.ndarray> out_comp_pts_arr).data  ,
+                           <float64*> (<np.ndarray> res_train).data ,
+                           len_res_train,
+                           <float64*> (<np.ndarray> out_sums).data  
+                           )
+    return out_sums,out_comp_pts_arr
+
+cdef float64 _calc_loss_deviance_c(
+            float64 *curr_ttls,
+            float64 *y,
+            float64 lidstone,
+            int32 len_y,
+            float64 len_y_float):
+    cdef float64 res=0.
+    cdef float64 p_=0.
+    cdef int32 i=0
+    for i in range(len_y):
+        p_=exp(curr_ttls[i])/(exp(curr_ttls[i])+exp(-curr_ttls[i]))
+        p_=(len_y_float*p_+lidstone)/(len_y_float+lidstone*2)
+        res=res-y[i]*log(p_)-(1.-y[i])*log(1-p_)
+#        
+# p_ = np.exp(curr_ttls) / \
+#        (np.exp(curr_ttls) + np.exp(-curr_ttls))
+#    #lidstone=0.01
+#    p_=(p_*len(y)+lidstone)/(len(y)+2*lidstone) # protect against perfect probabilities causing instability
+#    loss_=-np.sum(y*np.log(p_))-np.sum((1-y)*np.log(1-p_) )
+    return res
+  
+    
+def calc_loss_deviance_c(object curr_ttls, 
+                         object y, 
+                         float64 lidstone):
+    return _calc_loss_deviance_c(
+            <float64*> (<np.ndarray> curr_ttls).data ,
+            <float64*> (<np.ndarray> y).data ,
+            lidstone,
+            len(y),
+            np.float64(len(y) ))
+ 
+cdef void _update_preds_c(
+            float64 *out_new_preds_,
+            int32 len_preds,
+            int32 *comp_indx,
+            float64 coef_in,
+            float64 coef_out):
+
+    cdef int32 i=0
+    for i in range(len_preds):
+        if comp_indx[i]==1:
+            out_new_preds_[i]=out_new_preds_[i]+coef_in
+        else:
+            out_new_preds_[i]=out_new_preds_[i]+coef_out
+
+    return 
+ 
+cdef void _update_preds_2_c(
+            float64 *out_new_preds_,
+            float64 *curr_ttls,
+            int32 len_preds,
+            int32 *comp_indx,
+            float64 coef_in,
+            float64 coef_out):
+
+    cdef int32 i=0
+    for i in range(len_preds):
+        if comp_indx[i]==1:
+            out_new_preds_[i]=curr_ttls[i]+coef_in
+        else:
+            out_new_preds_[i]=curr_ttls[i]+coef_out
+
+    return 
+    
+def update_preds_c(object out_new_preds_, 
+                         object comp_indx, 
+                         float64 coef_in,
+                         float64 coef_out):
+    _update_preds_c(
+            <float64*> (<np.ndarray> out_new_preds_).data ,
+            len(out_new_preds_),
+            <int32*> (<np.ndarray> comp_indx).data ,
+            coef_in,
+            coef_out
+            )
+    return
+
+def update_preds_2_c(object out_new_preds_, 
+                   object curr_ttls,
+                         object comp_indx, 
+                         float64 coef_in,
+                         float64 coef_out):
+    _update_preds_2_c(
+            <float64*> (<np.ndarray> out_new_preds_).data ,
+            <float64*> (<np.ndarray> curr_ttls).data ,
+            len(out_new_preds_),
+            <int32*> (<np.ndarray> comp_indx).data ,
+            coef_in,
+            coef_out
+            )
+    return
+    
+        
